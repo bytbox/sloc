@@ -1,3 +1,4 @@
 .depend
 sloc
 *.o
+*.swp

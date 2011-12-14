@@ -59,6 +59,8 @@ var languages = map[string]Language{
 	".cpp": CLanguage{"C++"},
 	".cxx": CLanguage{"C++"},
 	".go": CLanguage{"Go"},
+
+	".lsp": LineLanguage{"Lisp"},
 }
 
 func handleFile(fname, content string) {

@@ -55,6 +55,9 @@ var info = map[string]*Stats{}
 
 var languages = map[string]Language{
 	".c": CLanguage{"C"},
+	".cc": CLanguage{"C++"},
+	".cpp": CLanguage{"C++"},
+	".cxx": CLanguage{"C++"},
 	".go": CLanguage{"Go"},
 }
 

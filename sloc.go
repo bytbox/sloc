@@ -32,8 +32,13 @@ func main() {
 	printInfo()
 }
 
+type Matcher interface{
+	Match(string) bool
+}
+
 type Language interface{
 	Name() string
+	Matcher
 	Update(string, *Stats)
 }
 
@@ -41,6 +46,12 @@ type lName string
 
 func (l lName) Name() string {
 	return string(l)
+}
+
+type lExt string
+
+func (e lExt) Match(fname string) bool {
+	return string(e) == path.Ext(fname)
 }
 
 type Stats struct{
@@ -53,19 +64,26 @@ type Stats struct{
 
 var info = map[string]*Stats{}
 
-var languages = map[string]Language{
-	".c": CLanguage{"C"},
-	".cc": CLanguage{"C++"},
-	".cpp": CLanguage{"C++"},
-	".cxx": CLanguage{"C++"},
-	".go": CLanguage{"Go"},
+var languages = []Language{
+	CLanguage{"C", ".c"},
+	CLanguage{"C++", ".cc"},
+	CLanguage{"C++", ".cpp"},
+	CLanguage{"C++", ".cxx"},
+	CLanguage{"Go", ".go"},
 
-	".lsp": LineLanguage{"Lisp"},
+	LineLanguage{"Lisp", ".lsp"},
 }
 
 func handleFile(fname, content string) {
-	ext := path.Ext(fname)
-	l, ok := languages[ext]
+	var l Language
+	ok := false
+	for _, lang := range languages {
+		if lang.Match(fname) {
+			ok = true
+			l = lang
+			break
+		}
+	}
 	if !ok {
 		return // ignore this file
 	}

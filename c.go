@@ -6,6 +6,7 @@ import (
 
 type CLanguage struct {
 	lName
+	lExt
 }
 
 func (l CLanguage) Update(c string, i *Stats) {

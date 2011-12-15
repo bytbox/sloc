@@ -6,7 +6,7 @@ import (
 
 type LineLanguage struct {
 	lName
-	lExt
+	lMatch
 }
 
 func (l LineLanguage) Update(c string, i *Stats) {

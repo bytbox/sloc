@@ -54,6 +54,24 @@ func (e lExt) Match(fname string) bool {
 	return string(e) == path.Ext(fname)
 }
 
+type lMatch func(string) bool
+
+func (m lMatch) Match(fname string) bool {
+	return m(fname)
+}
+
+func mExt(ext string) lMatch {
+	return func(fname string) bool {
+		return ext == path.Ext(fname)
+	}
+}
+
+func mName(name string) lMatch {
+	return func(fname string) bool {
+		return fname == name
+	}
+}
+
 type Stats struct{
 	FileCount    int
 	TotalLines   int
@@ -66,12 +84,19 @@ var info = map[string]*Stats{}
 
 var languages = []Language{
 	CLanguage{"C", ".c"},
+
 	CLanguage{"C++", ".cc"},
 	CLanguage{"C++", ".cpp"},
 	CLanguage{"C++", ".cxx"},
+
 	CLanguage{"Go", ".go"},
 
-	LineLanguage{"Lisp", ".lsp"},
+	LineLanguage{"Python", mExt(".py")},
+	LineLanguage{"Lisp", mExt(".lsp")},
+
+	LineLanguage{"Make", mName("makefile")},
+	LineLanguage{"Make", mName("Makefile")},
+	LineLanguage{"Make", mName("MAKEFILE")},
 }
 
 func handleFile(fname, content string) {

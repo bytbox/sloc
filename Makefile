@@ -1,7 +1,7 @@
 include ${GOROOT}/src/Make.inc
 
 TARG = sloc
-GOFILES = sloc.go c.go line.go
+GOFILES = sloc.go line.go
 
 include ${GOROOT}/src/Make.cmd
 

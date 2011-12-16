@@ -48,27 +48,31 @@ func (l lName) Name() string {
 	return string(l)
 }
 
-type lExt string
-
-func (e lExt) Match(fname string) bool {
-	return string(e) == path.Ext(fname)
-}
-
 type lMatch func(string) bool
 
 func (m lMatch) Match(fname string) bool {
 	return m(fname)
 }
 
-func mExt(ext string) lMatch {
+func mExt(exts ...string) lMatch {
 	return func(fname string) bool {
-		return ext == path.Ext(fname)
+		for _, ext := range exts {
+			if ext == path.Ext(fname) {
+				return true
+			}
+		}
+		return false
 	}
 }
 
-func mName(name string) lMatch {
+func mName(names ...string) lMatch {
 	return func(fname string) bool {
-		return fname == name
+		for _, name := range names {
+			if name == fname {
+				return true
+			}
+		}
+		return false
 	}
 }
 
@@ -83,20 +87,13 @@ type Stats struct{
 var info = map[string]*Stats{}
 
 var languages = []Language{
-	CLanguage{"C", ".c"},
-
-	CLanguage{"C++", ".cc"},
-	CLanguage{"C++", ".cpp"},
-	CLanguage{"C++", ".cxx"},
-
-	CLanguage{"Go", ".go"},
-
+	LineLanguage{"C", mExt(".c")},
+	LineLanguage{"C++", mExt(".cc", ".cpp", ".cxx")},
+	LineLanguage{"Go", mExt(".go")},
+	LineLanguage{"Haskell", mExt(".hs", ".lhs")},
 	LineLanguage{"Python", mExt(".py")},
 	LineLanguage{"Lisp", mExt(".lsp")},
-
-	LineLanguage{"Make", mName("makefile")},
-	LineLanguage{"Make", mName("Makefile")},
-	LineLanguage{"Make", mName("MAKEFILE")},
+	LineLanguage{"Make", mName("makefile", "Makefile", "MAKEFILE")},
 }
 
 func handleFile(fname, content string) {

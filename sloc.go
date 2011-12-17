@@ -94,6 +94,7 @@ var languages = []Language{
 	LineLanguage{"Python", mExt(".py")},
 	LineLanguage{"Lisp", mExt(".lsp")},
 	LineLanguage{"Make", mName("makefile", "Makefile", "MAKEFILE")},
+	LineLanguage{"HTML", mExt(".htm", ".html", ".xhtml")},
 }
 
 func handleFile(fname, content string) {

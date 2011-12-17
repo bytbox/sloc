@@ -68,7 +68,7 @@ func mExt(exts ...string) lMatch {
 func mName(names ...string) lMatch {
 	return func(fname string) bool {
 		for _, name := range names {
-			if name == fname {
+			if name == path.Base(fname) {
 				return true
 			}
 		}

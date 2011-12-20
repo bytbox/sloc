@@ -87,8 +87,8 @@ type Stats struct{
 var info = map[string]*Stats{}
 
 var languages = []Language{
-	LineLanguage{"C", mExt(".c")},
-	LineLanguage{"C++", mExt(".cc", ".cpp", ".cxx")},
+	LineLanguage{"C", mExt(".c", ".h")},
+	LineLanguage{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx")},
 	LineLanguage{"Go", mExt(".go")},
 	LineLanguage{"Haskell", mExt(".hs", ".lhs")},
 	LineLanguage{"Python", mExt(".py")},

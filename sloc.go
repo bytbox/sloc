@@ -36,15 +36,11 @@ func (l Language) Update(c string, s *Stats) {
 
 type Namer string
 
-func (l Namer) Name() string {
-	return string(l)
-}
+func (l Namer) Name() string { return string(l) }
 
 type Matcher func(string) bool
 
-func (m Matcher) Match(fname string) bool {
-	return m(fname)
-}
+func (m Matcher) Match(fname string) bool { return m(fname) }
 
 func mExt(exts ...string) Matcher {
 	return func(fname string) bool {

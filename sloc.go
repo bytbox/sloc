@@ -11,29 +11,6 @@ import (
 	"text/tabwriter"
 )
 
-func main() {
-	flag.Parse()
-
-	args := flag.Args()
-	if len(args) == 0 {
-		args = append(args, `.`)
-	}
-
-	for _, n := range args {
-		add(n)
-	}
-
-	for _, f := range files {
-		c, err := ioutil.ReadFile(f)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "  ! %s\n", f)
-		}
-		cs := string(c)
-		handleFile(f, cs)
-	}
-	printInfo()
-}
-
 type Language struct{
 	Namer
 	Matcher
@@ -184,4 +161,27 @@ func add(n string) {
 
 invalid:
 	fmt.Fprintf(os.Stderr, "  ! %s\n", n)
+}
+
+func main() {
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) == 0 {
+		args = append(args, `.`)
+	}
+
+	for _, n := range args {
+		add(n)
+	}
+
+	for _, f := range files {
+		c, err := ioutil.ReadFile(f)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "  ! %s\n", f)
+		}
+		cs := string(c)
+		handleFile(f, cs)
+	}
+	printInfo()
 }

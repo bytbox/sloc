@@ -33,17 +33,17 @@ var (
 	blankR = regexp.MustCompile(`^[ \t]*$`)
 )
 
-func (l Language) Update(c string, s *Stats) {
+func (l Language) Update(c []byte, s *Stats) {
 	s.FileCount++
-	b := bytes.Buffer{}
-	for _, r := range c {
-		if r == '\n' {
+	bb := bytes.Buffer{}
+	for _, b := range c {
+		if b == byte('\n') {
 			s.TotalLines++
-			if blankR.Match(b.Bytes()) { s.BlankLines++ }
-			b.Reset()
+			if blankR.Match(bb.Bytes()) { s.BlankLines++ }
+			bb.Reset()
 			continue
 		}
-		b.WriteRune(r)
+		bb.WriteByte(b)
 	}
 }
 
@@ -122,7 +122,7 @@ func handleFile(fname, content string) {
 		fmt.Fprintf(os.Stderr, "  ! %s\n", fname)
 		return
 	}
-	l.Update(string(c), i)
+	l.Update(c, i)
 }
 
 func printInfo() {

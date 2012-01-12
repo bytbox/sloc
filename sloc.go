@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 	"text/tabwriter"
 )
 
@@ -33,35 +33,35 @@ func main() {
 	printInfo()
 }
 
-type Matcher interface{
-	Match(string) bool
-}
-
 type Language struct{
-	lName
-	lMatch
+	Namer
+	Matcher
 }
 
-func (l Language) Update(c string, i *Stats) {
-	i.FileCount++
-
-	lines := strings.Split(c, "\n")
-	i.TotalLines += len(lines)
+func (l Language) Update(c string, s *Stats) {
+	s.FileCount++
+	b := bytes.Buffer{}
+	for _, r := range c {
+		if r == '\n' {
+			s.TotalLines++
+			continue
+		}
+	}
 }
 
-type lName string
+type Namer string
 
-func (l lName) Name() string {
+func (l Namer) Name() string {
 	return string(l)
 }
 
-type lMatch func(string) bool
+type Matcher func(string) bool
 
-func (m lMatch) Match(fname string) bool {
+func (m Matcher) Match(fname string) bool {
 	return m(fname)
 }
 
-func mExt(exts ...string) lMatch {
+func mExt(exts ...string) Matcher {
 	return func(fname string) bool {
 		for _, ext := range exts {
 			if ext == path.Ext(fname) {
@@ -72,7 +72,7 @@ func mExt(exts ...string) lMatch {
 	}
 }
 
-func mName(names ...string) lMatch {
+func mName(names ...string) Matcher {
 	return func(fname string) bool {
 		for _, name := range names {
 			if name == path.Base(fname) {
@@ -97,11 +97,11 @@ var languages = []Language{
 	Language{"C", mExt(".c", ".h")},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx")},
 	Language{"Go", mExt(".go")},
-	Language{"Haskell", mExt(".hs", ".lhs")},
+	/*Language{"Haskell", mExt(".hs", ".lhs")},
 	Language{"Python", mExt(".py")},
 	Language{"Lisp", mExt(".lsp")},
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE")},
-	Language{"HTML", mExt(".htm", ".html", ".xhtml")},
+	Language{"HTML", mExt(".htm", ".html", ".xhtml")},*/
 }
 
 func handleFile(fname, content string) {

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -36,10 +37,16 @@ type Matcher interface{
 	Match(string) bool
 }
 
-type Language interface{
-	Name() string
-	Matcher
-	Update(string, *Stats)
+type Language struct{
+	lName
+	lMatch
+}
+
+func (l Language) Update(c string, i *Stats) {
+	i.FileCount++
+
+	lines := strings.Split(c, "\n")
+	i.TotalLines += len(lines)
 }
 
 type lName string
@@ -87,14 +94,14 @@ type Stats struct{
 var info = map[string]*Stats{}
 
 var languages = []Language{
-	LineLanguage{"C", mExt(".c", ".h")},
-	LineLanguage{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx")},
-	LineLanguage{"Go", mExt(".go")},
-	LineLanguage{"Haskell", mExt(".hs", ".lhs")},
-	LineLanguage{"Python", mExt(".py")},
-	LineLanguage{"Lisp", mExt(".lsp")},
-	LineLanguage{"Make", mName("makefile", "Makefile", "MAKEFILE")},
-	LineLanguage{"HTML", mExt(".htm", ".html", ".xhtml")},
+	Language{"C", mExt(".c", ".h")},
+	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx")},
+	Language{"Go", mExt(".go")},
+	Language{"Haskell", mExt(".hs", ".lhs")},
+	Language{"Python", mExt(".py")},
+	Language{"Lisp", mExt(".lsp")},
+	Language{"Make", mName("makefile", "Makefile", "MAKEFILE")},
+	Language{"HTML", mExt(".htm", ".html", ".xhtml")},
 }
 
 func handleFile(fname, content string) {

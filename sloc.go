@@ -11,9 +11,22 @@ import (
 	"text/tabwriter"
 )
 
-type Language struct{
+type Commenter struct {
+	LineComment string
+	StartComment string
+	EndComment string
+	Nesting bool
+}
+
+var (
+	noComments = Commenter{`\0`, `\0`, `\0`, false}
+	cComments = Commenter{`//`, `/*`, `*/`, false}
+)
+
+type Language struct {
 	Namer
 	Matcher
+	LineComment Commenter
 }
 
 var (
@@ -75,15 +88,15 @@ type Stats struct{
 var info = map[string]*Stats{}
 
 var languages = []Language{
-	Language{"C", mExt(".c", ".h")},
-	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx")},
-	Language{"Go", mExt(".go")},
-	Language{"Haskell", mExt(".hs", ".lhs")},
-	Language{"Perl", mExt(".pl", ".pm")},
-	Language{"Python", mExt(".py")},
-	Language{"Lisp", mExt(".lsp")},
-	Language{"Make", mName("makefile", "Makefile", "MAKEFILE")},
-	Language{"HTML", mExt(".htm", ".html", ".xhtml")},
+	Language{"C", mExt(".c", ".h"), cComments},
+	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
+	Language{"Go", mExt(".go"), cComments},
+	Language{"Haskell", mExt(".hs", ".lhs"), noComments},
+	Language{"Perl", mExt(".pl", ".pm"), noComments},
+	Language{"Python", mExt(".py"), noComments},
+	Language{"Lisp", mExt(".lsp"), noComments},
+	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), noComments},
+	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
 }
 
 func handleFile(fname, content string) {

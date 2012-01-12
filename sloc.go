@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
 	"text/tabwriter"
 )
 
@@ -38,14 +39,21 @@ type Language struct{
 	Matcher
 }
 
+var (
+	blankR = regexp.MustCompile(`^[ \t]*$`)
+)
+
 func (l Language) Update(c string, s *Stats) {
 	s.FileCount++
 	b := bytes.Buffer{}
 	for _, r := range c {
 		if r == '\n' {
 			s.TotalLines++
+			if blankR.Match(b.Bytes()) { s.BlankLines++ }
+			b.Reset()
 			continue
 		}
+		b.WriteRune(r)
 	}
 }
 
@@ -132,9 +140,17 @@ func handleFile(fname, content string) {
 
 func printInfo() {
 	w := tabwriter.NewWriter(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
-	fmt.Fprintln(w, "Language\tFiles\tLines\t")
+	fmt.Fprintln(w, "Language\tFiles\tCode\tComment\tBlank\tTotal\t")
 	for n, i := range info {
-		fmt.Fprintf(w, "%s\t%d\t%d\t\n", n, i.FileCount, i.TotalLines)
+		fmt.Fprintf(
+			w,
+			"%s\t%d\t%d\t%d\t%d\t%d\t\n",
+			n,
+			i.FileCount,
+			i.CodeLines,
+			i.CommentLines,
+			i.BlankLines,
+			i.TotalLines)
 	}
 	w.Flush()
 }

@@ -105,11 +105,12 @@ var languages = []Language{
 	Language{"C", mExt(".c", ".h")},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx")},
 	Language{"Go", mExt(".go")},
-	/*Language{"Haskell", mExt(".hs", ".lhs")},
+	Language{"Haskell", mExt(".hs", ".lhs")},
+	Language{"Perl", mExt(".pl", ".pm")},
 	Language{"Python", mExt(".py")},
 	Language{"Lisp", mExt(".lsp")},
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE")},
-	Language{"HTML", mExt(".htm", ".html", ".xhtml")},*/
+	Language{"HTML", mExt(".htm", ".html", ".xhtml")},
 }
 
 func handleFile(fname, content string) {

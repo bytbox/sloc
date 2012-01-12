@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,21 +11,21 @@ import (
 )
 
 type Commenter struct {
-	LineComment string
+	LineComment  string
 	StartComment string
-	EndComment string
-	Nesting bool
+	EndComment   string
+	Nesting      bool
 }
 
 var (
 	noComments = Commenter{`\0`, `\0`, `\0`, false}
-	cComments = Commenter{`//`, `/*`, `*/`, false}
+	cComments  = Commenter{`//`, `/*`, `*/`, false}
 )
 
 type Language struct {
 	Namer
 	Matcher
-	LineComment Commenter
+	Commenter
 }
 
 var (
@@ -35,15 +34,22 @@ var (
 
 func (l Language) Update(c []byte, s *Stats) {
 	s.FileCount++
-	bb := bytes.Buffer{}
-	for _, b := range c {
+	// line pointers
+	lStart := 0
+
+	//lc := []byte(l.LineComment)
+	//sc := []byte(l.StartComment)
+	//ec := []byte(l.EndComment)
+
+	for i, b := range c {
 		if b == byte('\n') {
 			s.TotalLines++
-			if blankR.Match(bb.Bytes()) { s.BlankLines++ }
-			bb.Reset()
+			if blankR.Match(c[lStart:i]) {
+				s.BlankLines++
+			}
+			lStart = i+1
 			continue
 		}
-		bb.WriteByte(b)
 	}
 }
 
@@ -77,7 +83,7 @@ func mName(names ...string) Matcher {
 	}
 }
 
-type Stats struct{
+type Stats struct {
 	FileCount    int
 	TotalLines   int
 	CodeLines    int
@@ -161,7 +167,7 @@ func add(n string) {
 		}
 		return
 	}
-	if fi.Mode() & os.ModeType == 0 {
+	if fi.Mode()&os.ModeType == 0 {
 		files = append(files, n)
 		return
 	}

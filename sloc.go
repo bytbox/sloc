@@ -19,6 +19,10 @@ var languages = []Language{
 	Language{"Go", mExt(".go"), cComments},
 	Language{"Haskell", mExt(".hs", ".lhs"), noComments},
 	Language{"Perl", mExt(".pl", ".pm"), shComments},
+
+	Language{"Shell", mExt(".sh"), shComments},
+	Language{"Bash", mExt(".bash"), shComments},
+
 	Language{"Python", mExt(".py"), noComments},
 	Language{"Lisp", mExt(".lsp"), semiComments},
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},

@@ -17,7 +17,7 @@ var languages = []Language{
 	Language{"Haskell", mExt(".hs", ".lhs"), noComments},
 	Language{"Perl", mExt(".pl", ".pm"), shComments},
 	Language{"Python", mExt(".py"), noComments},
-	Language{"Lisp", mExt(".lsp"), noComments},
+	Language{"Lisp", mExt(".lsp"), lspComments},
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
 	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
 }
@@ -33,6 +33,7 @@ var (
 	noComments = Commenter{"\000", "\000", "\000", false}
 	cComments  = Commenter{`//`, `/*`, `*/`, false}
 	shComments = Commenter{`#`, "\000", "\000", false}
+	lspComments = Commenter{`;`, "\000", "\000", false}
 )
 
 type Language struct {

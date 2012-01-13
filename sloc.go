@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"regexp"
 	"runtime/pprof"
 	"text/tabwriter"
 )
@@ -30,23 +29,18 @@ type Language struct {
 	Commenter
 }
 
-var (
-	blankR = regexp.MustCompile(`^[ \t]*$`)
-)
-
 func (l Language) Update(c []byte, s *Stats) {
 	s.FileCount++
-	// line pointers
-	lStart := 0
 
 	inComment := 0 // this is an int for nesting
 	inLComment := false
+	blank := true
 	lc := []byte(l.LineComment)
 	sc := []byte(l.StartComment)
 	ec := []byte(l.EndComment)
 	lp, sp, ep := 0, 0, 0
 
-	for i, b := range c {
+	for _, b := range c {
 		if b == lc[lp] && !(inComment > 0) {
 			lp++
 			if lp == len(lc) {
@@ -72,21 +66,25 @@ func (l Language) Update(c []byte, s *Stats) {
 			}
 		} else { ep = 0 }
 
+		if b != byte(' ') && b != byte('\t') && b != byte('\n') {
+			blank = false
+		}
+
 		// Note that lines with both code and comment count towards
 		// each, but are not counted twice in the total.
 		if b == byte('\n') {
 			s.TotalLines++
-			if blankR.Match(c[lStart:i]) {
+			if blank {
 				s.BlankLines++
 			}
 			if inComment > 0 || inLComment {
-				if !blankR.Match(c[lStart:i]) {
+				if blank {
 					s.CodeLines++
 				}
 				inLComment = false
 				s.CommentLines++
 			} else { s.CodeLines++ }
-			lStart = i + 1
+			blank = true
 			continue
 		}
 	}

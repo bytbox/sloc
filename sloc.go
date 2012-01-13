@@ -18,8 +18,9 @@ type Commenter struct {
 }
 
 var (
-	noComments = Commenter{`\0`, `\0`, `\0`, false}
+	noComments = Commenter{"\000", "\000", "\000", false}
 	cComments  = Commenter{`//`, `/*`, `*/`, false}
+	shComments = Commenter{`#`, "\000", "\000", false}
 )
 
 type Language struct {
@@ -37,17 +38,54 @@ func (l Language) Update(c []byte, s *Stats) {
 	// line pointers
 	lStart := 0
 
-	//lc := []byte(l.LineComment)
-	//sc := []byte(l.StartComment)
-	//ec := []byte(l.EndComment)
+	inComment := 0 // this is an int for nesting
+	inLComment := false
+	lc := []byte(l.LineComment)
+	sc := []byte(l.StartComment)
+	ec := []byte(l.EndComment)
+	lp, sp, ep := 0, 0, 0
 
 	for i, b := range c {
+		if b == lc[lp] && !(inComment > 0) {
+			lp++
+			if lp == len(lc) {
+				inLComment = true
+				lp = 0
+			}
+		} else { lp = 0 }
+		if b == sc[sp] && !inLComment {
+			sp++
+			if sp == len(sc) {
+				inComment++
+				if inComment > 1 && !l.Nesting {
+					inComment = 1
+				}
+				sp = 0
+			}
+		} else { sp = 0 }
+		if b == ec[ep] && !inLComment && inComment > 0 {
+			ep++
+			if ep == len(ec) {
+				inComment--
+				ep = 0
+			}
+		} else { ep = 0 }
+
+		// Note that lines with both code and comment count towards
+		// each, but are not counted twice in the total.
 		if b == byte('\n') {
 			s.TotalLines++
 			if blankR.Match(c[lStart:i]) {
 				s.BlankLines++
 			}
-			lStart = i+1
+			if inComment > 0 || inLComment {
+				if !blankR.Match(c[lStart:i]) {
+					s.CodeLines++
+				}
+				inLComment = false
+				s.CommentLines++
+			} else { s.CodeLines++ }
+			lStart = i + 1
 			continue
 		}
 	}
@@ -98,10 +136,10 @@ var languages = []Language{
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
 	Language{"Go", mExt(".go"), cComments},
 	Language{"Haskell", mExt(".hs", ".lhs"), noComments},
-	Language{"Perl", mExt(".pl", ".pm"), noComments},
+	Language{"Perl", mExt(".pl", ".pm"), shComments},
 	Language{"Python", mExt(".py"), noComments},
 	Language{"Lisp", mExt(".lsp"), noComments},
-	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), noComments},
+	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
 	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
 }
 

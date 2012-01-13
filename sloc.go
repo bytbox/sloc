@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"runtime/pprof"
 	"text/tabwriter"
 )
 
@@ -143,7 +144,7 @@ var languages = []Language{
 	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
 }
 
-func handleFile(fname, content string) {
+func handleFile(fname string) {
 	var l Language
 	ok := false
 	for _, lang := range languages {
@@ -216,8 +217,19 @@ invalid:
 	fmt.Fprintf(os.Stderr, "  ! %s\n", n)
 }
 
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+
 func main() {
 	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
+			return
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	args := flag.Args()
 	if len(args) == 0 {
@@ -229,12 +241,7 @@ func main() {
 	}
 
 	for _, f := range files {
-		c, err := ioutil.ReadFile(f)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "  ! %s\n", f)
-		}
-		cs := string(c)
-		handleFile(f, cs)
+		handleFile(f)
 	}
 	printInfo()
 }

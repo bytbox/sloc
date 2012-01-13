@@ -10,6 +10,8 @@ import (
 	"text/tabwriter"
 )
 
+const VERSION = `0.1`
+
 var languages = []Language{
 	Language{"C", mExt(".c", ".h"), cComments},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
@@ -216,10 +218,17 @@ invalid:
 	fmt.Fprintf(os.Stderr, "  ! %s\n", n)
 }
 
-var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+var (
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	version = flag.Bool("V", false, "display version info and exit")
+)
 
 func main() {
 	flag.Parse()
+	if *version {
+		fmt.Printf("sloc %s\n", VERSION)
+		return
+	}
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {

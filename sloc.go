@@ -10,6 +10,18 @@ import (
 	"text/tabwriter"
 )
 
+var languages = []Language{
+	Language{"C", mExt(".c", ".h"), cComments},
+	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
+	Language{"Go", mExt(".go"), cComments},
+	Language{"Haskell", mExt(".hs", ".lhs"), noComments},
+	Language{"Perl", mExt(".pl", ".pm"), shComments},
+	Language{"Python", mExt(".py"), noComments},
+	Language{"Lisp", mExt(".lsp"), noComments},
+	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
+	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
+}
+
 type Commenter struct {
 	LineComment  string
 	StartComment string
@@ -129,18 +141,6 @@ type Stats struct {
 }
 
 var info = map[string]*Stats{}
-
-var languages = []Language{
-	Language{"C", mExt(".c", ".h"), cComments},
-	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
-	Language{"Go", mExt(".go"), cComments},
-	Language{"Haskell", mExt(".hs", ".lhs"), noComments},
-	Language{"Perl", mExt(".pl", ".pm"), shComments},
-	Language{"Python", mExt(".py"), noComments},
-	Language{"Lisp", mExt(".lsp"), noComments},
-	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
-	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
-}
 
 func handleFile(fname string) {
 	var l Language

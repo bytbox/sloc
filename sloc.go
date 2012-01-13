@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"runtime/pprof"
+	"sort"
 	"text/tabwriter"
 )
 
@@ -171,23 +172,6 @@ func handleFile(fname string) {
 	l.Update(c, i)
 }
 
-func printInfo() {
-	w := tabwriter.NewWriter(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
-	fmt.Fprintln(w, "Language\tFiles\tCode\tComment\tBlank\tTotal\t")
-	for n, i := range info {
-		fmt.Fprintf(
-			w,
-			"%s\t%d\t%d\t%d\t%d\t%d\t\n",
-			n,
-			i.FileCount,
-			i.CodeLines,
-			i.CommentLines,
-			i.BlankLines,
-			i.TotalLines)
-	}
-	w.Flush()
-}
-
 var files []string
 
 func add(n string) {
@@ -216,6 +200,54 @@ func add(n string) {
 
 invalid:
 	fmt.Fprintf(os.Stderr, "  ! %s\n", n)
+}
+
+type LData []LResult
+
+func (d LData) Len() int { return len(d) }
+
+func (d LData) Less(i, j int) bool { return d[i].CodeLines > d[j].CodeLines }
+
+func (d LData) Swap(i, j int) {
+	d[i], d[j] = d[j], d[i]
+}
+
+type LResult struct {
+	Name string
+	FileCount int
+	CodeLines int
+	CommentLines int
+	BlankLines int
+	TotalLines int
+}
+
+func printInfo() {
+	w := tabwriter.NewWriter(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
+	fmt.Fprintln(w, "Language\tFiles\tCode\tComment\tBlank\tTotal\t")
+	d := LData([]LResult{})
+	for n, i := range info {
+		d = append(d, LResult{
+			n,
+			i.FileCount,
+			i.CodeLines,
+			i.CommentLines,
+			i.BlankLines,
+			i.TotalLines,
+		})
+	}
+	sort.Sort(d)
+	for _, i := range d {
+		fmt.Fprintf(
+			w,
+			"%s\t%d\t%d\t%d\t%d\t%d\t\n",
+			i.Name,
+			i.FileCount,
+			i.CodeLines,
+			i.CommentLines,
+			i.BlankLines,
+			i.TotalLines)
+	}
+	w.Flush()
 }
 
 var (

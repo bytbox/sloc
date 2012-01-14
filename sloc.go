@@ -81,7 +81,7 @@ func (l Language) Update(c []byte, s *Stats) {
 		if b == ec[ep] && !inLComment && inComment > 0 {
 			ep++
 			if ep == len(ec) {
-				inComment--
+				if inComment > 0 { inComment-- }
 				ep = 0
 			}
 		} else { ep = 0 }

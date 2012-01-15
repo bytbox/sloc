@@ -24,7 +24,7 @@ var languages = []Language{
 	Language{"Bash", mExt(".bash"), shComments},
 
 	Language{"Python", mExt(".py"), noComments},
-	Language{"Lisp", mExt(".lsp"), semiComments},
+	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
 	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
 }

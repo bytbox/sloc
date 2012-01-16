@@ -94,15 +94,11 @@ func (l Language) Update(c []byte, s *Stats) {
 		// each, but are not counted twice in the total.
 		if b == byte('\n') {
 			s.TotalLines++
-			if blank {
-				s.BlankLines++
-			}
 			if inComment > 0 || inLComment {
-				if blank {
-					s.CodeLines++
-				}
 				inLComment = false
 				s.CommentLines++
+			} else if blank {
+				s.BlankLines++
 			} else { s.CodeLines++ }
 			blank = true
 			continue

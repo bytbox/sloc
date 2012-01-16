@@ -90,6 +90,7 @@ func (l Language) Update(c []byte, s *Stats) {
 			blank = false
 		}
 
+		// BUG(srl): lines with comment don't count towards code
 		// Note that lines with both code and comment count towards
 		// each, but are not counted twice in the total.
 		if b == byte('\n') {

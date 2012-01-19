@@ -24,12 +24,18 @@ var languages = []Language{
 	Language{"Bash", mExt(".bash"), shComments},
 
 	Language{"Python", mExt(".py"), noComments},
+	Language{"Assembly", mExt(".asm", ".s"), semiComments},
 	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
+
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
 	Language{"Jam", mName("Jamfile", "Jamrules"), shComments},
 
 	Language{"Markdown", mExt(".md"), noComments},
-	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
+
+	Language{"HTML", mExt(".htm", ".html", ".xhtml"), xmlComments},
+	Language{"XML", mExt(".xml"), xmlComments},
+	Language{"CSS", mExt(".css"), cssComments},
+	Language{"JavaScript", mExt(".js"), cComments},
 }
 
 type Commenter struct {
@@ -41,7 +47,9 @@ type Commenter struct {
 
 var (
 	noComments = Commenter{"\000", "\000", "\000", false}
+	xmlComments = Commenter{"\000", `<!--`, `-->`, false}
 	cComments  = Commenter{`//`, `/*`, `*/`, false}
+	cssComments  = Commenter{"\000", `/*`, `*/`, false}
 	shComments = Commenter{`#`, "\000", "\000", false}
 	semiComments = Commenter{`;`, "\000", "\000", false}
 )

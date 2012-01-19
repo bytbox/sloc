@@ -26,6 +26,9 @@ var languages = []Language{
 	Language{"Python", mExt(".py"), noComments},
 	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
+	Language{"Jam", mName("Jamfile", "Jamrules"), shComments},
+
+	Language{"Markdown", mExt(".md"), noComments},
 	Language{"HTML", mExt(".htm", ".html", ".xhtml"), noComments},
 }
 

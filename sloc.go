@@ -222,21 +222,35 @@ type LResult struct {
 	TotalLines int
 }
 
+func (r *LResult) Add(a LResult) {
+	r.FileCount += a.FileCount
+	r.CodeLines += a.CodeLines
+	r.CommentLines += a.CommentLines
+	r.BlankLines += a.BlankLines
+	r.TotalLines += a.TotalLines
+}
+
 func printInfo() {
 	w := tabwriter.NewWriter(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
 	fmt.Fprintln(w, "Language\tFiles\tCode\tComment\tBlank\tTotal\t")
 	d := LData([]LResult{})
+	total := &LResult{}
+	total.Name = "_Total"
 	for n, i := range info {
-		d = append(d, LResult{
+		r := LResult{
 			n,
 			i.FileCount,
 			i.CodeLines,
 			i.CommentLines,
 			i.BlankLines,
 			i.TotalLines,
-		})
+		}
+		d = append(d, r)
+		total.Add(r)
 	}
+	d = append(d, *total)
 	sort.Sort(d)
+	d[0].Name = "Total"
 	for _, i := range d {
 		fmt.Fprintf(
 			w,
@@ -248,6 +262,7 @@ func printInfo() {
 			i.BlankLines,
 			i.TotalLines)
 	}
+
 	w.Flush()
 }
 

@@ -219,7 +219,12 @@ type LData []LResult
 
 func (d LData) Len() int { return len(d) }
 
-func (d LData) Less(i, j int) bool { return d[i].CodeLines > d[j].CodeLines }
+func (d LData) Less(i, j int) bool {
+	if d[i].CodeLines == d[j].CodeLines {
+		return d[i].Name > d[j].Name
+	}
+	return d[i].CodeLines > d[j].CodeLines
+}
 
 func (d LData) Swap(i, j int) {
 	d[i], d[j] = d[j], d[i]
@@ -247,7 +252,7 @@ func printInfo() {
 	fmt.Fprintln(w, "Language\tFiles\tCode\tComment\tBlank\tTotal\t")
 	d := LData([]LResult{})
 	total := &LResult{}
-	total.Name = "_Total"
+	total.Name = "Total"
 	for n, i := range info {
 		r := LResult{
 			n,
@@ -262,7 +267,7 @@ func printInfo() {
 	}
 	d = append(d, *total)
 	sort.Sort(d)
-	d[0].Name = "Total"
+	//d[0].Name = "Total"
 	for _, i := range d {
 		fmt.Fprintf(
 			w,

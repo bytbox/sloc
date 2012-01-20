@@ -60,6 +60,7 @@ type Language struct {
 	Commenter
 }
 
+// TODO work properly with unicode
 func (l Language) Update(c []byte, s *Stats) {
 	s.FileCount++
 

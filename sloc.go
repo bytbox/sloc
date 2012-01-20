@@ -72,14 +72,14 @@ func (l Language) Update(c []byte, s *Stats) {
 	lp, sp, ep := 0, 0, 0
 
 	for _, b := range c {
-		if b == lc[lp] && !(inComment > 0) {
+		if inComment == 0 && b == lc[lp] {
 			lp++
 			if lp == len(lc) {
 				inLComment = true
 				lp = 0
 			}
 		} else { lp = 0 }
-		if b == sc[sp] && !inLComment {
+		if !inLComment && b == sc[sp] {
 			sp++
 			if sp == len(sc) {
 				inComment++
@@ -89,7 +89,7 @@ func (l Language) Update(c []byte, s *Stats) {
 				sp = 0
 			}
 		} else { sp = 0 }
-		if b == ec[ep] && !inLComment && inComment > 0 {
+		if !inLComment && inComment > 0 && b == ec[ep] {
 			ep++
 			if ep == len(ec) {
 				if inComment > 0 { inComment-- }

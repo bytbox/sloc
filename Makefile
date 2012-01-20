@@ -1,10 +1,13 @@
-include ${GOROOT}/src/Make.inc
-
 TARG = sloc
 GOFILES = sloc.go
 
-include ${GOROOT}/src/Make.cmd
+${TARG}: ${GOFILES}
+	go build -x -o $@
+
+clean:
+	rm -f ${TARG}
 
 fmt:
 	gofmt -w *.go
 
+.PHONY: install clean fmt

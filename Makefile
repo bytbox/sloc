@@ -2,7 +2,7 @@ TARG = sloc
 GOFILES = sloc.go
 
 ${TARG}: ${GOFILES}
-	go build -x -o $@
+	go build -x
 
 clean:
 	rm -f ${TARG}

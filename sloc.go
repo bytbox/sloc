@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -247,6 +248,12 @@ func (r *LResult) Add(a LResult) {
 	r.TotalLines += a.TotalLines
 }
 
+func printJSON() {
+	bs, err := json.MarshalIndent(info, "", "  ")
+	if err != nil { panic(err) }
+	fmt.Println(string(bs))
+}
+
 func printInfo() {
 	w := tabwriter.NewWriter(os.Stdout, 2, 8, 2, ' ', tabwriter.AlignRight)
 	fmt.Fprintln(w, "Language\tFiles\tCode\tComment\tBlank\tTotal\t")
@@ -285,6 +292,7 @@ func printInfo() {
 
 var (
 	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	useJson = flag.Bool("json", false, "JSON-format output")
 	version = flag.Bool("V", false, "display version info and exit")
 )
 
@@ -316,5 +324,10 @@ func main() {
 	for _, f := range files {
 		handleFile(f)
 	}
-	printInfo()
+
+	if *useJson {
+		printJSON()
+	} else {
+		printInfo()
+	}
 }

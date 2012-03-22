@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
+	"path"
 	"runtime/pprof"
 	"sort"
-	"strings"
 	"text/tabwriter"
 )
 
@@ -132,7 +131,7 @@ func (m Matcher) Match(fname string) bool { return m(fname) }
 func mExt(exts ...string) Matcher {
 	return func(fname string) bool {
 		for _, ext := range exts {
-			if ext == filepath.Ext(fname) {
+			if ext == path.Ext(fname) {
 				return true
 			}
 		}
@@ -143,7 +142,7 @@ func mExt(exts ...string) Matcher {
 func mName(names ...string) Matcher {
 	return func(fname string) bool {
 		for _, name := range names {
-			if name == filepath.Base(fname) {
+			if name == path.Base(fname) {
 				return true
 			}
 		}
@@ -187,7 +186,6 @@ func handleFile(fname string) {
 	l.Update(c, i)
 }
 
-var ignoreGlobs []string
 var files []string
 
 func add(n string) {
@@ -196,21 +194,13 @@ func add(n string) {
 		goto invalid
 	}
 	if fi.IsDir() {
-		n += "/"
-	}
-	for _, p := range ignoreGlobs {
-		if m, _ := filepath.Match(p, n); m {
-			return
-		}
-	}
-	if fi.IsDir() {
 		fs, err := ioutil.ReadDir(n)
 		if err != nil {
 			goto invalid
 		}
 		for _, f := range fs {
 			if f.Name()[0] != '.' {
-				add(filepath.Join(n, f.Name()))
+				add(path.Join(n, f.Name()))
 			}
 		}
 		return
@@ -300,15 +290,6 @@ func printInfo() {
 	w.Flush()
 }
 
-func tryReadGitIgnore() {
-	ign, err := ioutil.ReadFile(".gitignore")
-	if err != nil {
-		return
-	}
-	gs := strings.Split(string(ign), "\n")
-	ignoreGlobs = append(ignoreGlobs, gs...)
-}
-
 var (
 	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 	useJson = flag.Bool("json", false, "JSON-format output")
@@ -335,8 +316,6 @@ func main() {
 	if len(args) == 0 {
 		args = append(args, `.`)
 	}
-
-	tryReadGitIgnore()
 
 	for _, n := range args {
 		add(n)

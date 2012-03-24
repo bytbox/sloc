@@ -24,7 +24,7 @@ var languages = []Language{
 	Language{"Shell", mExt(".sh"), shComments},
 	Language{"Bash", mExt(".bash"), shComments},
 
-	Language{"Python", mExt(".py"), noComments},
+	Language{"Python", mExt(".py"), pyComments},
 	Language{"Assembly", mExt(".asm", ".s"), semiComments},
 	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
 
@@ -54,6 +54,7 @@ var (
 	shComments = Commenter{`#`, "\000", "\000", false}
 	semiComments = Commenter{`;`, "\000", "\000", false}
 	hsComments  = Commenter{`--`, `{-`, `-}`, true}
+	pyComments = Commenter{`#`, `"""`, `"""`, false}
 )
 
 type Language struct {

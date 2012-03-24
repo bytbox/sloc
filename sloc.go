@@ -18,7 +18,7 @@ var languages = []Language{
 	Language{"C", mExt(".c", ".h"), cComments},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
 	Language{"Go", mExt(".go"), cComments},
-	Language{"Haskell", mExt(".hs", ".lhs"), noComments},
+	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
 	Language{"Perl", mExt(".pl", ".pm"), shComments},
 
 	Language{"Shell", mExt(".sh"), shComments},
@@ -53,6 +53,7 @@ var (
 	cssComments  = Commenter{"\000", `/*`, `*/`, false}
 	shComments = Commenter{`#`, "\000", "\000", false}
 	semiComments = Commenter{`;`, "\000", "\000", false}
+	hsComments  = Commenter{`--`, `{-`, `-}`, true}
 )
 
 type Language struct {

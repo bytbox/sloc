@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-const VERSION = `0.1`
+const VERSION = `0.1.1`
 
 var languages = []Language{
 	Language{"C", mExt(".c", ".h"), cComments},
@@ -24,14 +24,20 @@ var languages = []Language{
 	Language{"Shell", mExt(".sh"), shComments},
 	Language{"Bash", mExt(".bash"), shComments},
 
+	Language{"Ruby", mExt(".rb"), shComments},
 	Language{"Python", mExt(".py"), pyComments},
 	Language{"Assembly", mExt(".asm", ".s"), semiComments},
 	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
+	Language{"Scheme", mExt(".scm", ".scheme"), semiComments},
 
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
 	Language{"Jam", mName("Jamfile", "Jamrules"), shComments},
 
 	Language{"Markdown", mExt(".md"), noComments},
+
+	Language{"HAML", mExt(".haml"), noComments},
+	Language{"SASS", mExt(".sass"), cssComments},
+	Language{"SCSS", mExt(".scss"), cssComments},
 
 	Language{"HTML", mExt(".htm", ".html", ".xhtml"), xmlComments},
 	Language{"XML", mExt(".xml"), xmlComments},

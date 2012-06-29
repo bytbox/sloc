@@ -18,6 +18,9 @@ var languages = []Language{
 	Language{"C", mExt(".c", ".h"), cComments},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
 	Language{"Go", mExt(".go"), cComments},
+	Language{"Scala", mExt(".scala"), cComments},
+	Language{"Java", mExt(".java"), cComments},
+
 	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
 	Language{"Perl", mExt(".pl", ".pm"), shComments},
 

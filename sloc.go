@@ -15,6 +15,8 @@ import (
 const VERSION = `0.1.1`
 
 var languages = []Language{
+	Language{"Thrift", mExt(".thrift"), cComments},
+
 	Language{"C", mExt(".c", ".h"), cComments},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
 	Language{"Go", mExt(".go"), cComments},

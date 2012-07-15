@@ -36,6 +36,7 @@ var languages = []Language{
 	Language{"Scheme", mExt(".scm", ".scheme"), semiComments},
 
 	Language{"Make", mName("makefile", "Makefile", "MAKEFILE"), shComments},
+	Language{"CMake", mName("CMakeLists.txt"), shComments},
 	Language{"Jam", mName("Jamfile", "Jamrules"), shComments},
 
 	Language{"Markdown", mExt(".md"), noComments},

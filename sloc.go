@@ -23,6 +23,8 @@ var languages = []Language{
 	Language{"Scala", mExt(".scala"), cComments},
 	Language{"Java", mExt(".java"), cComments},
 
+	Language{"SQL", mExt(".sql"), sqlComments},
+
 	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
 	Language{"Perl", mExt(".pl", ".pm"), shComments},
 
@@ -66,6 +68,7 @@ var (
 	shComments = Commenter{`#`, "\000", "\000", false}
 	semiComments = Commenter{`;`, "\000", "\000", false}
 	hsComments  = Commenter{`--`, `{-`, `-}`, true}
+	sqlComments  = Commenter{`--`, "\000", "\000", false}
 	pyComments = Commenter{`#`, `"""`, `"""`, false}
 )
 

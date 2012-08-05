@@ -23,6 +23,9 @@ var languages = []Language{
 	Language{"Scala", mExt(".scala"), cComments},
 	Language{"Java", mExt(".java"), cComments},
 
+	Language{"YACC", mExt(".y"), cComments},
+	Language{"Lex", mExt(".l"), cComments},
+
 	Language{"SQL", mExt(".sql"), sqlComments},
 
 	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},

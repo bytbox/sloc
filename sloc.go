@@ -29,7 +29,9 @@ var languages = []Language{
 	Language{"SQL", mExt(".sql"), sqlComments},
 
 	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
+
 	Language{"Perl", mExt(".pl", ".pm"), shComments},
+	Language{"PHP", mExt(".php"), cComments},
 
 	Language{"Shell", mExt(".sh"), shComments},
 	Language{"Bash", mExt(".bash"), shComments},

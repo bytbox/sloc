@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use JSON qw/from_json/;
+use GD::Graph;
+use GD::Graph::area;
+
+my @rdata;
+
+open IN, 'git rev-list master --reverse --timestamp |' or die $!;
+while (<IN>) {
+	chomp;
+	my ($ts, $rev) = split / /;
+	system "git checkout --quiet $rev";
+	my $json = `sloc -json`;
+	my $result = from_json $json or die $!;
+
+	my ($filecount, $total, $code, $blank, $comment) = (0, 0, 0, 0, 0);
+
+	for my $lang (keys $result) {
+		$filecount += $result->{$lang}{"FileCount"};
+		$total += $result->{$lang}{TotalLines};
+		$code += $result->{$lang}{CodeLines};
+		$blank += $result->{$lang}{BlankLines};
+		$comment += $result->{$lang}{CommentLines};
+	}
+
+	push @rdata, [$ts, $code, $blank, $comment];
+}
+close IN or die $!;
+
+my @data;
+for my $y (0 .. $#rdata) {
+	for my $x (0 .. $#{$rdata[$y]}) {
+		$data[$x][$y] = $rdata[$y][$x];
+	}
+}
+
+my $gr = GD::Graph::area->new(3000, 2000);
+$gr->set(
+	transparent => 0,
+);
+$gr->plot(\@data);
+open OUT, ">out.png" or die $!;
+binmode OUT;
+print OUT $gr->gd->png();
+close OUT or die $!;
+

@@ -3,9 +3,18 @@
 use strict;
 use warnings;
 
+use Cwd qw/getcwd/;
+use File::Path qw/rmtree/;
 use JSON qw/from_json/;
 use GD::Graph;
 use GD::Graph::area;
+
+my $calldir = getcwd;
+my $repo = shift || '.';
+my $destrepo = '/tmp/reposloc-' . int(rand(100000));
+
+system "git", "clone", "-q", $repo, $destrepo;
+chdir $destrepo or die $!;
 
 my @rdata;
 
@@ -43,8 +52,12 @@ $gr->set(
 	transparent => 0,
 );
 $gr->plot(\@data);
+
+chdir $calldir;
 open OUT, ">out.png" or die $!;
 binmode OUT;
 print OUT $gr->gd->png();
 close OUT or die $!;
+
+rmtree $destrepo;
 

@@ -4,10 +4,16 @@ use strict;
 use warnings;
 
 use Cwd qw/getcwd/;
+use DateTime;
 use File::Path qw/rmtree/;
 use JSON qw/from_json/;
 use GD::Graph;
 use GD::Graph::area;
+
+sub format_date {
+	my $dt = DateTime->from_epoch(epoch => shift);
+	return $dt->datetime();
+}
 
 my $calldir = getcwd;
 my $repo = shift || '.';
@@ -47,10 +53,15 @@ for my $y (0 .. $#rdata) {
 	}
 }
 
-my $gr = GD::Graph::area->new(3000, 2000);
+my $gr = GD::Graph::area->new(1440, 900);
 $gr->set(
 	transparent => 0,
+	cumulate => 1,
+	x_tick_number => 'auto',
+	x_labels_vertical => 1,
+	x_number_format => \&format_date,
 );
+$gr->set_legend("Code", "Blank", "Comment");
 $gr->plot(\@data);
 
 chdir $calldir;

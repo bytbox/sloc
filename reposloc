@@ -4,22 +4,14 @@ use strict;
 use warnings;
 
 use Cwd qw/getcwd/;
-use DateTime;
 use File::Path qw/rmtree/;
 use JSON qw/from_json/;
-use GD::Graph;
-use GD::Graph::area;
-
-sub format_date {
-	my $dt = DateTime->from_epoch(epoch => shift);
-	return $dt->datetime();
-}
 
 my $calldir = getcwd;
 my $repo = shift || '.';
 my $destrepo = '/tmp/reposloc-' . int(rand(100000));
 
-system "git", "clone", "-q", $repo, $destrepo;
+system "git", "clone", "-q", $repo, $destrepo and die "VCS call failed";
 chdir $destrepo or die $!;
 
 my @rdata;
@@ -38,37 +30,78 @@ while (<IN>) {
 		$filecount += $result->{$lang}{"FileCount"};
 		$total += $result->{$lang}{TotalLines};
 		$code += $result->{$lang}{CodeLines};
-		$blank += $result->{$lang}{BlankLines};
 		$comment += $result->{$lang}{CommentLines};
 	}
 
-	push @rdata, [$ts, $code, $blank, $comment];
+	print "$ts $code $comment\n";
 }
 close IN or die $!;
 
-my @data;
-for my $y (0 .. $#rdata) {
-	for my $x (0 .. $#{$rdata[$y]}) {
-		$data[$x][$y] = $rdata[$y][$x];
-	}
-}
-
-my $gr = GD::Graph::area->new(1440, 900);
-$gr->set(
-	transparent => 0,
-	cumulate => 1,
-	x_tick_number => 'auto',
-	x_labels_vertical => 1,
-	x_number_format => \&format_date,
-);
-$gr->set_legend("Code", "Blank", "Comment");
-$gr->plot(\@data);
-
 chdir $calldir;
-open OUT, ">out.png" or die $!;
-binmode OUT;
-print OUT $gr->gd->png();
-close OUT or die $!;
-
 rmtree $destrepo;
+
+__END__
+
+=head1 NAME
+
+reposloc - get source-lines-of-code statistics from a git or mercurial
+repository
+
+=head1 SYNOPSIS
+
+B<reposloc> [I<OPTIONS>] [[I<VCS>:]I<REPOSITORY>] ...
+
+=head1 DESCRIPTION
+
+B<reposloc> performs source-lines-of-code analysis on a repository's history
+and produces graphs of the number of lines of code versus time. Supported
+version control systems are I<git>(1) and I<hg>(1) - if none is specified,
+B<reposloc> will attempt to autodetect the system used. Autodetection does not
+work on "bare" repositories. If multiple repositories are specified, they will
+be treated as a single large repository.
+
+B<reposloc> has two main modes of operation: it can tally total statistics
+across languages, or it can tally statistics for each language individually,
+with the intent of comparison.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-sparse>
+
+By default, B<reposloc> will look at every single commit in the repository. For
+large repositories (with more than a few thousand commits) or multiple
+repositories, this takes quite a while and is mostly a waste of time. Using
+B<-sparse> tells reposloc only to collect one data point per day.
+
+=item B<-noplot>
+
+Dump the resulting data to standard output without handing it off to I<gnuplot>(1).
+
+=item B<-bylang>
+
+Collects data on a per-language basis for comparison between languages, rather
+than only collecting total statistics (more useful for broad graphs and
+comparing SLoC with comments).
+
+=item B<-nocomments>
+
+In "totals" mode, just graph the number of lines of code, and don't display
+data for amount of comments. In by-language mode (with B<-bylang>), doesn't
+include comments in each language's statistic.
+
+=back
+
+=head1 BUGS
+
+None known. Please report any found to the author.
+
+=head1 AUTHOR
+
+Scott Lawrence <bytbox@gmail.com>
+
+=head1 SEE ALSO
+
+I<sloc>(1)
 

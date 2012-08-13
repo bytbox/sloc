@@ -7,11 +7,21 @@ use Cwd qw/getcwd/;
 use File::Path qw/rmtree/;
 use JSON qw/from_json/;
 
+# Parse arguments.
+my %opts;
+my $na = shift || '.';
+while ($na =~ /^-/) {
+	$opts{sparse} = 1 if $na eq '-sparse';
+	$opts{noplot} = 1 if $na eq '-noplot';
+	$opts{bylang} = 1 if $na eq '-bylang';
+	$opts{nocomments} = 1 if $na eq '-nocomments';
+	$na = shift || '.';
+}
 my $calldir = getcwd;
-my $repo = shift || '.';
-my $destrepo = '/tmp/reposloc-' . int(rand(100000));
+my $repo = $na;
 
-system "git", "clone", "-q", $repo, $destrepo and die "VCS call failed";
+my $destrepo = '/tmp/reposloc-' . int(rand(100000));
+die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
 chdir $destrepo or die $!;
 
 my @rdata;
@@ -95,7 +105,9 @@ include comments in each language's statistic.
 
 =head1 BUGS
 
-None known. Please report any found to the author.
+Analysis of branches other than C<master> is not supported.
+
+Please report any further bugs found to the author.
 
 =head1 AUTHOR
 

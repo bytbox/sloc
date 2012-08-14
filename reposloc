@@ -26,9 +26,9 @@ while ($na =~ /^-/) {
 	}
 	$na = shift || '.';
 }
-my $calldir = getcwd;
 my $repo = $na;
 
+my $calldir = getcwd;
 my $destrepo = '/tmp/reposloc-' . int(rand(10000000));
 die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
 chdir $destrepo or die $!;

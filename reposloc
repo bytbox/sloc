@@ -6,21 +6,30 @@ use warnings;
 use Cwd qw/getcwd/;
 use File::Path qw/rmtree/;
 use JSON qw/from_json/;
+use Switch;
+
+sub print_help;
 
 # Parse arguments.
 my %opts;
 my $na = shift || '.';
 while ($na =~ /^-/) {
-	$opts{sparse} = 1 if $na eq '-sparse';
-	$opts{noplot} = 1 if $na eq '-noplot';
-	$opts{bylang} = 1 if $na eq '-bylang';
-	$opts{nocomments} = 1 if $na eq '-nocomments';
+	switch ($na) {
+		case '-sparse' { $opts{sparse} = 1 }
+		case '-noplot' { $opts{noplot} = 1 }
+		case '-bylang' { $opts{bylang} = 1 }
+		case '-nocomments' { $opts{nocomments} = 1 }
+		else {
+			print_help;
+			exit
+		}
+	}
 	$na = shift || '.';
 }
 my $calldir = getcwd;
 my $repo = $na;
 
-my $destrepo = '/tmp/reposloc-' . int(rand(100000));
+my $destrepo = '/tmp/reposloc-' . int(rand(10000000));
 die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
 chdir $destrepo or die $!;
 
@@ -43,12 +52,23 @@ while (<IN>) {
 		$comment += $result->{$lang}{CommentLines};
 	}
 
-	print "$ts $code $comment\n";
+	print "$ts $code $comment\n" if $opts{noplot};
 }
 close IN or die $!;
 
 chdir $calldir;
 rmtree $destrepo;
+
+sub print_help {
+	print<<END;
+usage: $0 [OPTIONS] [[VCS:]REPOSITORY] ...
+options:
+  -sparse      Iterate on dates rather than commits
+  -noplot      Don't pass to gnuplot; just print to standard output
+  -bylang      Show statistics for individual languages
+  -nocomments  Don't include comment counts
+END
+}
 
 __END__
 

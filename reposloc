@@ -7,6 +7,8 @@ use Cwd qw/getcwd/;
 use DateTime;
 use DateTime::Duration;
 use File::Path qw/rmtree/;
+use File::Spec::Functions qw/catfile/;
+use IO::Handle;
 use JSON qw/from_json/;
 use Switch;
 
@@ -64,12 +66,15 @@ if ($opts{sparse}) {
 	@commits = @commit_info;
 }
 
-my $out = \*STDOUT;
+my $out;
+$out = \*STDOUT if $opts{noplot};
 unless ($opts{noplot}) {
-	open $out, "| gnuplot -p" or die $!;
+	open $out, "| gnuplot" or die $!;
+	$out->autoflush(1);
+	my $outfile = catfile($calldir, 'output.png');
 	print $out <<END;
-#set terminal png
-#set output 'output.png'
+set terminal png
+set output '$outfile'
 plot '-'
 END
 }
@@ -93,16 +98,15 @@ for (@commits) {
 			$code += $result->{$lang}{CodeLines};
 			$comment += $result->{$lang}{CommentLines};
 		}
-		print "$code $comment\n"
+		print $out "$code $comment\n";
 	}
 }
 
 unless ($opts{noplot}) {
 	print $out <<END;
 e
+exit
 END
-	sleep 1;
-	print $out "exit\n";
 	wait or die $!;
 	close $out;
 }

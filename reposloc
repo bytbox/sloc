@@ -98,7 +98,9 @@ for (@commits) {
 			$code += $result->{$lang}{CodeLines};
 			$comment += $result->{$lang}{CommentLines};
 		}
-		print $out "$code $comment\n";
+		print $out $code;
+		print $out " $comment" unless $opts{nocomments};
+		print $out "\n";
 	}
 }
 

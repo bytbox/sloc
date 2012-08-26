@@ -15,6 +15,9 @@ use JSON qw/from_json/;
 use Switch;
 
 sub print_help;
+sub vcs_clone;
+sub vcs_revlist;
+sub vcs_checkout;
 
 # Parse arguments.
 my %opts;
@@ -38,18 +41,12 @@ my $repo = $na;
 print STDERR "Cloning repository...\n" if $opts{progress};
 my $calldir = getcwd;
 my $destrepo = '/tmp/reposloc-' . int(rand(10000000));
-die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
+vcs_clone "git", $repo, $destrepo;
 chdir $destrepo or die $!;
 
 # Read list of commits
 print STDERR "Reading commits...\n" if $opts{progress};
-my @commit_info;
-open IN, 'git rev-list master --reverse --timestamp |' or die $!;
-while (<IN>) {
-	chomp;
-	push @commit_info, $_;
-}
-close IN or die $!;
+my @commit_info = vcs_revlist "git";
 
 # Pick commits to be processed
 my @commits;
@@ -77,7 +74,7 @@ for (@commits) {
 	$i++;
 	print STDERR "Fetching statistics: $i / $ccount\n" if $opts{progress};
 	my ($ts, $rev) = split / /;
-	system "git checkout --quiet $rev";
+	vcs_checkout "git", $rev;
 	my $json = `sloc -json`;
 	my $result = from_json $json or die $!;
 	$data{$ts} = $result;
@@ -182,6 +179,28 @@ options:
   -nocomments  Don't include comment counts
   -progress    Display progress information
 END
+}
+
+sub vcs_clone {
+	my ($vcs, $repo, $destrepo) = @_;
+	die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
+}
+
+sub vcs_revlist {
+	my ($vcs) = @_;
+	my @rl;
+	open IN, 'git rev-list master --reverse --timestamp |' or die $!;
+	while (<IN>) {
+		chomp;
+		push @rl, $_;
+	}
+	close IN or die $!;
+	return @rl;
+}
+
+sub vcs_checkout {
+	my ($vcs, $rev) = @_;
+	system "git checkout --quiet $rev";
 }
 
 __END__

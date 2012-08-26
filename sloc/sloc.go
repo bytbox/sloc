@@ -30,7 +30,7 @@ var languages = []Language{
 
 	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
 
-	Language{"Perl", mExt(".pl", ".pm"), shComments},
+	Language{"Perl", mExt(".pl", ".pm"), perlComments},
 	Language{"PHP", mExt(".php"), cComments},
 
 	Language{"Shell", mExt(".sh"), shComments},
@@ -75,6 +75,9 @@ var (
 	hsComments   = Commenter{`--`, `{-`, `-}`, true}
 	sqlComments  = Commenter{`--`, "\000", "\000", false}
 	pyComments   = Commenter{`#`, `"""`, `"""`, false}
+
+	// TODO support POD and __END__
+	perlComments = Commenter{`#`, "\000", "\000", false}
 )
 
 type Language struct {

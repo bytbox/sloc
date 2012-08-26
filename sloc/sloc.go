@@ -213,6 +213,7 @@ func handleFile(fname string) {
 			return
 		}
 	}
+	// TODO No recognized extension - check for hashbang
 }
 
 var files []string

@@ -97,13 +97,26 @@ unless ($opts{noplot}) {
 	$out = \*STDOUT;
 }
 
+# Header
+print $out "Date ";
+if ($opts{bylang}) {
+	for my $lang (@langs) {
+		print $out "$lang ";
+	}
+}
+print $out "\n";
+
 for (@commits) {
 	my ($ts, $rev) = split / /;
 	my $result = $data{$ts};
 	print $out "$ts ";
 	if ($opts{bylang}) {
 		for my $lang (@langs) {
-
+			my $r = $result->{$lang};
+			my $v = 0;
+			$v += $r->{CodeLines} if $r;
+			$v += $r->{CommentLines} if $r and not $opts{nocomments};
+			print $out "$v ";
 		}
 	} else {
 		my ($code, $comment) = (0, 0);
@@ -130,10 +143,19 @@ set output '$outfile'
 set xdata time
 set timefmt "%s"
 END
-	if ($opts{nocomments}) {
-		print $gp "plot '$dfilename' using 1:2 with lines\n";
+	unless ($opts{bylang}) {
+		if ($opts{nocomments}) {
+			print $gp "plot '$dfilename' using 1:2 with lines\n";
+		} else {
+			print $gp "plot '$dfilename' using 1:2 with lines, '' using 1:3 with lines\n";
+		}
 	} else {
-		print $gp "plot '$dfilename' using 1:2 with lines, '' using 1:3 with lines\n";
+		# One part for each language
+		print $gp "plot '$dfilename' using 1:2 with lines";
+		for (my $i = 3; $i < ($#langs+3); $i++) {
+			print $gp ", '' using 1:$i with lines";
+		}
+		print $gp "\n";
 	}
 	print $gp "exit\n";
 	wait;

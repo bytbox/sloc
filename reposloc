@@ -141,55 +141,6 @@ END
 	rm $dfilename or die $!;
 }
 
-#my $out;
-#$out = \*STDOUT if $opts{noplot};
-#unless ($opts{noplot}) {
-#	open $out, "| gnuplot" or die $!;
-#	$out->autoflush(1);
-#	my $outfile = catfile($calldir, 'output.png');
-#	print $out <<END;
-#set terminal png size 800, 580
-#set output '$outfile'
-#plot '-' with filledcurves below x1
-#END
-#}
-#
-#my $i = 0;
-#my $ccount = $#commits + 1;
-#for (@commits) {
-#	$i++;
-#	print STDERR "$i / $ccount\n" if $opts{progress};
-#	my ($ts, $rev) = split / /;
-#	system "git checkout --quiet $rev";
-#	my $json = `sloc -json`;
-#	my $result = from_json $json or die $!;
-#
-#	print $out "$ts ";
-#
-#	if ($opts{bylang}) {
-#		# Individual language stats
-#	} else {
-#		# Collecting totals
-#		my ($code, $comment) = (0, 0);
-#		for my $lang (keys $result) {
-#			$code += $result->{$lang}{CodeLines};
-#			$comment += $result->{$lang}{CommentLines};
-#		}
-#		print $out $code;
-#		print $out " $comment" unless $opts{nocomments};
-#		print $out "\n";
-#	}
-#}
-
-#unless ($opts{noplot}) {
-#	print $out <<END;
-#e
-#exit
-#END
-#	wait or die $!;
-#	close $out;
-#}
-
 chdir $calldir;
 rmtree $destrepo;
 

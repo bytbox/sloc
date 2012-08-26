@@ -111,9 +111,9 @@ for (@commits) {
 	my $result = $data{$ts};
 	print $out "$ts ";
 	if ($opts{bylang}) {
+		my $v = 0;
 		for my $lang (@langs) {
 			my $r = $result->{$lang};
-			my $v = 0;
 			$v += $r->{CodeLines} if $r;
 			$v += $r->{CommentLines} if $r and not $opts{nocomments};
 			print $out "$v ";
@@ -151,9 +151,9 @@ END
 		}
 	} else {
 		# One part for each language
-		print $gp "plot '$dfilename' using 1:2 with lines";
+		print $gp "plot '$dfilename' using 1:2 with lines title columnheader";
 		for (my $i = 3; $i < ($#langs+3); $i++) {
-			print $gp ", '' using 1:$i with lines";
+			print $gp ", '' using 1:$i with lines title columnheader";
 		}
 		print $gp "\n";
 	}

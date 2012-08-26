@@ -151,9 +151,9 @@ set timefmt "%s"
 END
 	unless ($opts{bylang}) {
 		if ($opts{nocomments}) {
-			print $gp "plot '$dfilename' using 1:2 with lines title columnheader\n";
+			print $gp "plot '$dfilename' using 1:2 with filledcurves y1=0 title columnheader\n";
 		} else {
-			print $gp "plot '$dfilename' using 1:2 with lines title columnheader, '' using 1:3 with lines title columnheader\n";
+			print $gp "plot '$dfilename' using 1:3 with filledcurves y1=0 title columnheader, '' using 1:2 with filledcurves y1=0 title columnheader\n";
 		}
 	} else {
 		# One part for each language

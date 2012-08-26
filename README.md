@@ -31,3 +31,9 @@ Install `sloc` with:
 
     $ go get git.bytbox.net/sloc.git/sloc
 
+## `reposloc`
+
+For graphing amount of code over time (as revealed by a git or mercurial
+repository), a `reposloc` perl script is provided. This is not installable via
+the `go` tool. Consult the man page for usage information.
+

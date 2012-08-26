@@ -157,11 +157,11 @@ END
 		}
 	} else {
 		# One part for each language
-		print $gp "plot '$dfilename' using 1:2 with lines title columnheader";
-		for (my $i = 3; $i < ($#langs+3); $i++) {
-			print $gp ", '' using 1:$i with lines title columnheader";
+		print $gp "plot '$dfilename' ";
+		for (my $i = $#langs+2; $i > 2; $i--) {
+			print $gp "using 1:$i with filledcurves y1=0 title columnheader, '' ";
 		}
-		print $gp "\n";
+		print $gp "using 1:2 with filledcurves y1=0 title columnheader\n";
 	}
 	print $gp "exit\n";
 	wait;

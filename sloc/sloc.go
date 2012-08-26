@@ -66,15 +66,15 @@ type Commenter struct {
 }
 
 var (
-	noComments = Commenter{"\000", "\000", "\000", false}
-	xmlComments = Commenter{"\000", `<!--`, `-->`, false}
-	cComments  = Commenter{`//`, `/*`, `*/`, false}
+	noComments   = Commenter{"\000", "\000", "\000", false}
+	xmlComments  = Commenter{"\000", `<!--`, `-->`, false}
+	cComments    = Commenter{`//`, `/*`, `*/`, false}
 	cssComments  = Commenter{"\000", `/*`, `*/`, false}
-	shComments = Commenter{`#`, "\000", "\000", false}
+	shComments   = Commenter{`#`, "\000", "\000", false}
 	semiComments = Commenter{`;`, "\000", "\000", false}
-	hsComments  = Commenter{`--`, `{-`, `-}`, true}
+	hsComments   = Commenter{`--`, `{-`, `-}`, true}
 	sqlComments  = Commenter{`--`, "\000", "\000", false}
-	pyComments = Commenter{`#`, `"""`, `"""`, false}
+	pyComments   = Commenter{`#`, `"""`, `"""`, false}
 )
 
 type Language struct {
@@ -102,7 +102,9 @@ func (l Language) Update(c []byte, s *Stats) {
 				inLComment = true
 				lp = 0
 			}
-		} else { lp = 0 }
+		} else {
+			lp = 0
+		}
 		if !inLComment && b == sc[sp] {
 			sp++
 			if sp == len(sc) {
@@ -112,14 +114,20 @@ func (l Language) Update(c []byte, s *Stats) {
 				}
 				sp = 0
 			}
-		} else { sp = 0 }
+		} else {
+			sp = 0
+		}
 		if !inLComment && inComment > 0 && b == ec[ep] {
 			ep++
 			if ep == len(ec) {
-				if inComment > 0 { inComment-- }
+				if inComment > 0 {
+					inComment--
+				}
 				ep = 0
 			}
-		} else { ep = 0 }
+		} else {
+			ep = 0
+		}
 
 		if b != byte(' ') && b != byte('\t') && b != byte('\n') {
 			blank = false
@@ -135,7 +143,9 @@ func (l Language) Update(c []byte, s *Stats) {
 				s.CommentLines++
 			} else if blank {
 				s.BlankLines++
-			} else { s.CodeLines++ }
+			} else {
+				s.CodeLines++
+			}
 			blank = true
 			continue
 		}
@@ -182,19 +192,7 @@ type Stats struct {
 
 var info = map[string]*Stats{}
 
-func handleFile(fname string) {
-	var l Language
-	ok := false
-	for _, lang := range languages {
-		if lang.Match(fname) {
-			ok = true
-			l = lang
-			break
-		}
-	}
-	if !ok {
-		return // ignore this file
-	}
+func handleFileLang(fname string, l Language) {
 	i, ok := info[l.Name()]
 	if !ok {
 		i = &Stats{}
@@ -206,6 +204,15 @@ func handleFile(fname string) {
 		return
 	}
 	l.Update(c, i)
+}
+
+func handleFile(fname string) {
+	for _, lang := range languages {
+		if lang.Match(fname) {
+			handleFileLang(fname, lang)
+			return
+		}
+	}
 }
 
 var files []string
@@ -254,12 +261,12 @@ func (d LData) Swap(i, j int) {
 }
 
 type LResult struct {
-	Name string
-	FileCount int
-	CodeLines int
+	Name         string
+	FileCount    int
+	CodeLines    int
 	CommentLines int
-	BlankLines int
-	TotalLines int
+	BlankLines   int
+	TotalLines   int
 }
 
 func (r *LResult) Add(a LResult) {
@@ -272,7 +279,9 @@ func (r *LResult) Add(a LResult) {
 
 func printJSON() {
 	bs, err := json.MarshalIndent(info, "", "  ")
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(string(bs))
 }
 
@@ -283,30 +292,14 @@ func printInfo() {
 	total := &LResult{}
 	total.Name = "Total"
 	for n, i := range info {
-		r := LResult{
-			n,
-			i.FileCount,
-			i.CodeLines,
-			i.CommentLines,
-			i.BlankLines,
-			i.TotalLines,
-		}
+		r := LResult{n, i.FileCount, i.CodeLines, i.CommentLines, i.BlankLines, i.TotalLines}
 		d = append(d, r)
 		total.Add(r)
 	}
 	d = append(d, *total)
 	sort.Sort(d)
-	//d[0].Name = "Total"
 	for _, i := range d {
-		fmt.Fprintf(
-			w,
-			"%s\t%d\t%d\t%d\t%d\t%d\t\n",
-			i.Name,
-			i.FileCount,
-			i.CodeLines,
-			i.CommentLines,
-			i.BlankLines,
-			i.TotalLines)
+		fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%d\t%d\t\n", i.Name, i.FileCount, i.CodeLines, i.CommentLines, i.BlankLines, i.TotalLines)
 	}
 
 	w.Flush()
@@ -314,8 +307,8 @@ func printInfo() {
 
 var (
 	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-	useJson = flag.Bool("json", false, "JSON-format output")
-	version = flag.Bool("V", false, "display version info and exit")
+	useJson    = flag.Bool("json", false, "JSON-format output")
+	version    = flag.Bool("V", false, "display version info and exit")
 )
 
 func main() {

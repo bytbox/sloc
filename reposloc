@@ -23,7 +23,7 @@ sub vcs_checkout;
 # Parse arguments.
 my %opts;
 my $na = shift || '.';
-while ($na =~ /^-/) {
+while ($na =~ /^-./) {
 	switch ($na) {
 		case '-sparse' { $opts{sparse} = 1 }
 		case '-noplot' { $opts{noplot} = 1 }
@@ -38,6 +38,19 @@ while ($na =~ /^-/) {
 	}
 	$na = shift || '.';
 }
+
+# Figure out what the repositories we want are
+my @repos;
+if ($na =~ /^-$/) {
+	# Read the list of repositories from standard input
+	while (<STDIN>) {
+		push @repos, $_;
+	}
+} else {
+	push @repos, $na;
+	push @repos, @ARGV;
+}
+
 my $repo = "";
 my $vcs = "";
 if ($na =~ /^git::(.*)$/) {
@@ -272,6 +285,7 @@ repository
 =head1 SYNOPSIS
 
 B<reposloc> [I<OPTIONS>] [[I<VCS>::]I<REPOSITORY>] ...
+B<reposloc> [I<OPTIONS>] - < repositories.txt
 
 =head1 DESCRIPTION
 
@@ -280,7 +294,9 @@ and produces graphs of the number of lines of code versus time. Supported
 version control systems are I<git>(1) and I<hg>(1) - if none is specified,
 B<reposloc> will attempt to autodetect the system used. Autodetection does not
 work on "bare" repositories. If multiple repositories are specified, they will
-be treated as a single large repository.
+be treated as a single large repository. If a single dash is provided as the
+repository name, then standard input will be read as a newline-separated list
+of repositories.
 
 B<reposloc> has two main modes of operation: it can tally total statistics
 across languages, or it can tally statistics for each language individually,

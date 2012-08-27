@@ -43,9 +43,7 @@ while ($na =~ /^-./) {
 my @repos;
 if ($na =~ /^-$/) {
 	# Read the list of repositories from standard input
-	while (<STDIN>) {
-		push @repos, $_;
-	}
+	push @repos, $_ while <STDIN>;
 } else {
 	push @repos, $na;
 	push @repos, @ARGV;

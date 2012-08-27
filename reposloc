@@ -28,6 +28,7 @@ while ($na =~ /^-/) {
 		case '-bylang' { $opts{bylang} = 1 }
 		case '-nocomments' { $opts{nocomments} = 1 }
 		case '-progress' { $opts{progress} = 1 }
+		case '-verbose' { $opts{verbose} = 1 }
 		else {
 			print_help;
 			exit
@@ -37,10 +38,10 @@ while ($na =~ /^-/) {
 }
 my $repo = "";
 my $vcs = "";
-if ($na =~ /^git:(.*)$/) {
+if ($na =~ /^git::(.*)$/) {
 	$vcs = "git";
 	$repo = $1;
-} elsif ($na =~ /^hg:(.*)$/) {
+} elsif ($na =~ /^hg::(.*)$/) {
 	$vcs = "hg";
 	$repo = $1;
 } else {
@@ -49,7 +50,7 @@ if ($na =~ /^git:(.*)$/) {
 	if (-d catfile($repo, ".git")) {
 		$vcs = "git";
 	} elsif (-d catfile($repo, ".hg")) {
-		$vcs = "git";
+		$vcs = "hg";
 	} else {
 		die "directory does not appear to be a repository";
 	}
@@ -58,12 +59,12 @@ if ($na =~ /^git:(.*)$/) {
 print STDERR "Cloning repository...\n" if $opts{progress};
 my $calldir = getcwd;
 my $destrepo = tmpnam();
-vcs_clone "git", $repo, $destrepo;
+vcs_clone $vcs, $repo, $destrepo;
 chdir $destrepo or die $!;
 
 # Read list of commits
 print STDERR "Reading commits...\n" if $opts{progress};
-my @commit_info = vcs_revlist "git";
+my @commit_info = vcs_revlist $vcs;
 
 # Pick commits to be processed
 my @commits;
@@ -91,7 +92,7 @@ for (@commits) {
 	$i++;
 	print STDERR "Fetching statistics: $i / $ccount\n" if $opts{progress};
 	my ($ts, $rev) = split / /;
-	vcs_checkout "git", $rev;
+	vcs_checkout $vcs, $rev;
 	my $json = `sloc -json`;
 	my $result = from_json $json or die $!;
 	$data{$ts} = $result;
@@ -195,6 +196,7 @@ options:
   -bylang      Show statistics for individual languages
   -nocomments  Don't include comment counts
   -progress    Display progress information
+  -verbose     Print extra information
 END
 }
 
@@ -202,10 +204,18 @@ sub vcs_clone {
 	my ($vcs, $repo, $destrepo) = @_;
 	switch ($vcs) {
 		case "git" {
-			die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
+			my @cmd = ("git", "clone", "-b", "master");
+			push @cmd, "-q" unless $opts{verbose};
+			push @cmd, $repo, $destrepo;
+			print ("> " . (join ' ', @cmd) . "\n");
+			die "git clone failed" if system @cmd;
 		}
-		else {
-			die "unsupported vcs: $vcs";
+		case "hg" {
+			my @cmd = ("hg", "clone", "-b", "default");
+			push @cmd, "-q" unless $opts{verbose};
+			push @cmd, $repo, $destrepo;
+			print ("> " . (join ' ', @cmd) . "\n");
+			die "mercury clone failed" if system @cmd;
 		}
 	}
 }
@@ -223,7 +233,7 @@ sub git_revlist {
 
 sub hg_revlist {
 	my @rl;
-	open IN, 'hg log -f --template "{node} {date}\n" |' or die $!;
+	open IN, 'hg log -f --template "{date} {node}\n" |' or die $!;
 	while (<IN>) {
 		chomp;
 		push @rl, $_;
@@ -238,9 +248,7 @@ sub vcs_revlist {
 	my ($vcs) = @_;
 	switch ($vcs) {
 		case "git" { return git_revlist; }
-		else {
-			die "unsupported vcs: $vcs";
-		}
+		case "hg" { return hg_revlist; }
 	}
 }
 
@@ -248,6 +256,7 @@ sub vcs_checkout {
 	my ($vcs, $rev) = @_;
 	switch ($vcs) {
 		case "git" { system "git checkout --quiet $rev"; }
+		case "hg" { system "hg checkout --quiet $rev"; }
 	}
 }
 
@@ -305,6 +314,11 @@ include comments in each language's statistic.
 =item B<-progress>
 
 Print progress information to standard error.
+
+=item B<-verbose>
+
+Shows what commands are being run, and instructs those commands to print their
+own verbose information. This option may not go well with B<-progress>.
 
 =back
 

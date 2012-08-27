@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# TODO support multiple repositories
+
 use strict;
 use warnings;
 

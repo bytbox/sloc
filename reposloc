@@ -236,12 +236,12 @@ sub hg_revlist {
 	open IN, 'hg log -f --template "{date} {node}\n" |' or die $!;
 	while (<IN>) {
 		chomp;
-		push @rl, $_;
+		my ($d, $rev) = split / /;
+		my ($ts, $ms) = split /\./, $d;
+		push @rl, "$ts $rev";
 	}
 	close IN or die $!;
-	# TODO reverse
-	# TODO fix timestamp
-	return @rl;
+	return (reverse @rl);
 }
 
 sub vcs_revlist {

@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-# TODO use proper temporary files
-
 use strict;
 use warnings;
 
@@ -10,6 +8,7 @@ use DateTime;
 use DateTime::Duration;
 use File::Path qw/rmtree/;
 use File::Spec::Functions qw/catfile/;
+use File::Temp qw/tmpnam/;
 use IO::Handle;
 use JSON qw/from_json/;
 use Switch;
@@ -40,7 +39,7 @@ my $repo = $na;
 
 print STDERR "Cloning repository...\n" if $opts{progress};
 my $calldir = getcwd;
-my $destrepo = '/tmp/reposloc-' . int(rand(10000000));
+my $destrepo = tmpnam();
 vcs_clone "git", $repo, $destrepo;
 chdir $destrepo or die $!;
 
@@ -85,7 +84,7 @@ my @langs = keys %langsh;
 # Post-process and graph
 
 my $out;
-my $dfilename = '/tmp/reposloc-data-' . int(rand(10000000));
+my $dfilename = tmpnam();
 unless ($opts{noplot}) {
 	# gnuplot is rather limited, so we'll need to write the data to a
 	# temporary file.
@@ -183,11 +182,17 @@ END
 
 sub vcs_clone {
 	my ($vcs, $repo, $destrepo) = @_;
-	die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
+	switch ($vcs) {
+		case "git" {
+			die "VCS call failed" if system "git", "clone", "-q", "-b", "master", $repo, $destrepo;
+		}
+		else {
+			die "unsupported vcs: $vcs";
+		}
+	}
 }
 
-sub vcs_revlist {
-	my ($vcs) = @_;
+sub git_revlist {
 	my @rl;
 	open IN, 'git rev-list master --reverse --timestamp |' or die $!;
 	while (<IN>) {
@@ -198,9 +203,34 @@ sub vcs_revlist {
 	return @rl;
 }
 
+sub hg_revlist {
+	my @rl;
+	open IN, 'hg log -f --template "{node} {date}\n" |' or die $!;
+	while (<IN>) {
+		chomp;
+		push @rl, $_;
+	}
+	close IN or die $!;
+	# TODO reverse
+	# TODO fix timestamp
+	return @rl;
+}
+
+sub vcs_revlist {
+	my ($vcs) = @_;
+	switch ($vcs) {
+		case "git" { return git_revlist; }
+		else {
+			die "unsupported vcs: $vcs";
+		}
+	}
+}
+
 sub vcs_checkout {
 	my ($vcs, $rev) = @_;
-	system "git checkout --quiet $rev";
+	switch ($vcs) {
+		case "git" { system "git checkout --quiet $rev"; }
+	}
 }
 
 __END__

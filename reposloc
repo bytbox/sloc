@@ -215,7 +215,7 @@ sub vcs_clone {
 			push @cmd, "-q" unless $opts{verbose};
 			push @cmd, $repo, $destrepo;
 			print ("> " . (join ' ', @cmd) . "\n");
-			die "mercury clone failed" if system @cmd;
+			die "mercurial clone failed" if system @cmd;
 		}
 	}
 }

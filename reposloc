@@ -35,7 +35,25 @@ while ($na =~ /^-/) {
 	}
 	$na = shift || '.';
 }
-my $repo = $na;
+my $repo = "";
+my $vcs = "";
+if ($na =~ /^git:(.*)$/) {
+	$vcs = "git";
+	$repo = $1;
+} elsif ($na =~ /^hg:(.*)$/) {
+	$vcs = "hg";
+	$repo = $1;
+} else {
+	$repo = $na;
+	# autodetect based on presence of '.git', '.hg' etc.
+	if (-d catfile($repo, ".git")) {
+		$vcs = "git";
+	} elsif (-d catfile($repo, ".hg")) {
+		$vcs = "git";
+	} else {
+		die "directory does not appear to be a repository";
+	}
+}
 
 print STDERR "Cloning repository...\n" if $opts{progress};
 my $calldir = getcwd;

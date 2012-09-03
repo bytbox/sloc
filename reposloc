@@ -361,9 +361,13 @@ be treated as a single large repository. If a single dash is provided as the
 repository name, then standard input will be read as a newline-separated list
 of repositories.
 
+Detection of URLs in the repositories list is not supported - to automatically
+clone and analyze a remote repository, use the I<VCS>:: syntax.
+
 B<reposloc> has two main modes of operation: it can tally total statistics
-across languages, or it can tally statistics for each language individually,
-with the intent of comparison.
+across languages (and optionally display comments and code as separate data),
+or it can tally statistics for each language individually, with the intent of
+comparison. The choice of mode has no effect on performance.
 
 =head1 OPTIONS
 

@@ -109,13 +109,17 @@ for my $repo (@repos) {
 }
 
 # We'll construct an in-memory graph for each repository, and then add them together at the end.
+my ($ri, $rt) = (0, $#repos+1);
 my %langsh; # set of all languages in use
 my %data; # $data{$repo}{$timestamp}
 for my $repo (@repos) {
-	print STDERR "Fetching stats for '$repo'...\n" if $opts{progress} or $opts{verbose};
 	my @ci = @{$commits{$repo}};
+	$ri++;
+	my ($pci, $pct) = (0, $#ci+1); print STDERR " $ri/$rt\tFetching stats for '$repo' ($pct commits)...\n" if $opts{progress} or $opts{verbose};
 	chdir $destrepo{$repo};
 	for (@ci) {
+		$pci++;
+		print STDERR " $pci";
 		my ($ts, $rev) = split / /;
 		vcs_checkout $vcs{$repo}, $rev;
 		my $json = `sloc -json`;
@@ -123,6 +127,7 @@ for my $repo (@repos) {
 		$data{$repo}{$ts} = $result;
 		$langsh{$_} = 1 for keys $result;
 	}
+	print "\n";
 	chdir $calldir;
 }
 my @langs = keys %langsh;
@@ -189,7 +194,7 @@ for my $ts (@times) {
 	for my $repo (@repos) {
 		my @rts = @{$rtimes{$repo}};
 		# see if there's anything waiting
-		my $nt = $rts[0];
+		my $nt = $rts[0] || LONG_MAX;
 		while ($nt <= $ts) {
 			shift @rts;
 			# and here we update %current
@@ -199,7 +204,7 @@ for my $ts (@times) {
 		$rtimes{$repo} = \@rts;
 	}
 	
-	print $out "$ts ";
+	print $out "$ts";
 	if ($opts{bylang}) {
 		my $v = 0;
 		for my $lang (@langs) {
@@ -208,7 +213,7 @@ for my $ts (@times) {
 				$v += $r->{CodeLines} if $r;
 				$v += $r->{CommentLines} if $r and not $opts{nocomments};
 			}
-			print $out "$v ";
+			print $out " $v";
 		}
 	} else {
 		my ($code, $comment) = (0, 0);
@@ -219,7 +224,7 @@ for my $ts (@times) {
 				$code += $d->{$lang}{CodeLines};
 				$comment += $d->{$lang}{CommentLines};
 			}
-			print $out $code;
+			print $out " $code";
 			my $total = $code + $comment;
 			print $out " $total" unless $opts{nocomments};
 		}

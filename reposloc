@@ -227,31 +227,6 @@ for my $ts (@times) {
 	print $out "\n";
 }
 
-#for (@commits) {
-#	my ($ts, $rev) = split / /;
-#	my $result = $data{$ts};
-#	print $out "$ts ";
-#	if ($opts{bylang}) {
-#		my $v = 0;
-#		for my $lang (@langs) {
-#			my $r = $result->{$lang};
-#			$v += $r->{CodeLines} if $r;
-#			$v += $r->{CommentLines} if $r and not $opts{nocomments};
-#			print $out "$v ";
-#		}
-#	} else {
-#		my ($code, $comment) = (0, 0);
-#		for my $lang (keys $result) {
-#			$code += $result->{$lang}{CodeLines};
-#			$comment += $result->{$lang}{CommentLines};
-#		}
-#		print $out $code;
-#		my $total = $code + $comment;
-#		print $out " $total" unless $opts{nocomments};
-#	}
-#	print $out "\n";
-#}
-
 unless ($opts{noplot}) {
 	close $out or die $!;
 	my $gp;

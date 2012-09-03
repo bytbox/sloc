@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-# TODO support multiple repositories
-
 use strict;
 use warnings;
 
@@ -13,6 +11,7 @@ use File::Spec::Functions qw/catfile/;
 use File::Temp qw/tmpnam/;
 use IO::Handle;
 use JSON qw/from_json/;
+use POSIX qw/LONG_MAX/;
 use Switch;
 
 sub print_help;
@@ -49,71 +48,89 @@ if ($na =~ /^-$/) {
 	push @repos, @ARGV;
 }
 
-my $repo = "";
-my $vcs = "";
-if ($na =~ /^git::(.*)$/) {
-	$vcs = "git";
-	$repo = $1;
-} elsif ($na =~ /^hg::(.*)$/) {
-	$vcs = "hg";
-	$repo = $1;
-} else {
-	$repo = $na;
-	# autodetect based on presence of '.git', '.hg' etc.
-	if (-d catfile($repo, ".git")) {
-		$vcs = "git";
-	} elsif (-d catfile($repo, ".hg")) {
-		$vcs = "hg";
+# Get type of repositories
+my %vcs;
+for my $r (@repos) {
+	my $v = "";
+	if ($r =~ /^git::(.*)$/) {
+		$v = "git";
+		$r = $1;
+	} elsif ($na =~ /^hg::(.*)$/) {
+		$v = "hg";
+		$r = $1;
 	} else {
-		die "directory does not appear to be a repository";
-	}
-}
-
-print STDERR "Cloning repository...\n" if $opts{progress};
-my $calldir = getcwd;
-my $destrepo = tmpnam();
-vcs_clone $vcs, $repo, $destrepo;
-chdir $destrepo or die $!;
-
-# Read list of commits
-print STDERR "Reading commits...\n" if $opts{progress};
-my @commit_info = vcs_revlist $vcs;
-
-# Pick commits to be processed
-my @commits;
-if ($opts{sparse}) {
-	my $last = DateTime->from_epoch(epoch => 0);
-	for (@commit_info) {
-		my ($ts, $rev) = split / /;
-		my $dt = DateTime->from_epoch(epoch => $ts);
-		$dt->truncate(to=>"day");
-		if ($dt->delta_days($last)->in_units('days') >= 1) {
-			$last = $dt;
-			push @commits, "$ts $rev";
+		# autodetect based on presence of '.git', '.hg' etc.
+		if (-d catfile($r, ".git")) {
+			$v = "git";
+		} elsif (-d catfile($r, ".hg")) {
+			$v = "hg";
+		} else {
+			die "directory does not appear to be a repository";
 		}
 	}
-} else {
-	@commits = @commit_info;
+	$vcs{$r} = $v;
 }
 
-# Collect all data from sloc
-my $i = 0;
-my $ccount = $#commits + 1;
-my %data;
-my %langsh;
-for (@commits) {
-	$i++;
-	print STDERR "Fetching statistics: $i / $ccount\n" if $opts{progress};
-	my ($ts, $rev) = split / /;
-	vcs_checkout $vcs, $rev;
-	my $json = `sloc -json`;
-	my $result = from_json $json or die $!;
-	$data{$ts} = $result;
-	$langsh{$_} = 1 for keys $result; 
+# Clone all repositories
+print STDERR "Cloning repositories...\n" if $opts{progress};
+my %destrepo;
+my $calldir = getcwd;
+for my $repo (@repos) {
+	$destrepo{$repo} = tmpnam();
+	vcs_clone $vcs{$repo}, $repo, $destrepo{$repo};
+}
+
+# Read a list of commits for each repository
+my %commits;
+print STDERR "Reading commits...\n" if $opts{progress};
+for my $repo (@repos) {
+	chdir $destrepo{$repo};
+	my @ci = vcs_revlist $vcs{$repo};
+	chdir $calldir;
+	unless ($opts{sparse}) {
+		$commits{$repo} = \@ci;
+	} else {
+		my @cs;
+		# Weed out changes that occured on the same day. We have to do
+		# this both here (rather than below) so that we don't waste
+		# time running `sloc` on these changes.
+		my $last = DateTime->from_epoch(epoch => 0);
+		for (@ci) {
+			my ($ts, $rev) = split / /;
+			my $dt = DateTime->from_epoch(epoch => $ts);
+			$dt->truncate(to=>"day");
+			if ($dt->delta_days($last)->in_units('days') >= 1) {
+				$last = $dt;
+				push @cs, "$ts $rev";
+			}
+		}
+		$commits{$repo} = \@cs;
+	}
+}
+
+# We'll construct an in-memory graph for each repository, and then add them together at the end.
+my %langsh; # set of all languages in use
+my %data; # $data{$repo}{$timestamp}
+for my $repo (@repos) {
+	print STDERR "Fetching stats for '$repo'...\n" if $opts{progress} or $opts{verbose};
+	my @ci = @{$commits{$repo}};
+	chdir $destrepo{$repo};
+	for (@ci) {
+		my ($ts, $rev) = split / /;
+		vcs_checkout $vcs{$repo}, $rev;
+		my $json = `sloc -json`;
+		my $result = from_json $json or die $!;
+		$data{$repo}{$ts} = $result;
+		$langsh{$_} = 1 for keys $result;
+	}
+	chdir $calldir;
 }
 my @langs = keys %langsh;
 
-# Post-process and graph
+# Clean up temporary clones
+rmtree $destrepo{$_} for @repos;
+
+## Post-process and graph
 
 my $out;
 my $dfilename = tmpnam();
@@ -128,9 +145,7 @@ unless ($opts{noplot}) {
 # Header
 print $out "Date ";
 if ($opts{bylang}) {
-	for my $lang (@langs) {
-		print $out "$lang ";
-	}
+	print $out "$_ " for @langs;
 } else {
 	unless ($opts{nocomments}) {
 		print $out "Code Comments";
@@ -140,30 +155,102 @@ if ($opts{bylang}) {
 }
 print $out "\n";
 
-for (@commits) {
-	my ($ts, $rev) = split / /;
-	my $result = $data{$ts};
+# Collect all times in use.
+my %timesh;
+my %rtimes;
+for my $repo (@repos) {
+	my @tss = sort keys $data{$repo};
+	$timesh{$_} = 1 for @tss;
+	$rtimes{$repo} = \@tss;
+}
+my @atimes = sort (keys %timesh);
+my @times;
+unless ($opts{sparse}) {
+	# Outside of sparse mode, we just want all the times.
+	@times = @atimes;
+} else {
+	# In sparse mode, we want a total of one time per day in which
+	# something changed.
+	my $last = DateTime->from_epoch(epoch => 0);
+	for my $ts (@atimes) {
+		my $dt = DateTime->from_epoch(epoch => $ts);
+		$dt->truncate(to => "day");
+		if ($dt->delta_days($last)->in_units('days') >= 1) {
+			$last = $dt;
+			push @times, $ts;
+		}
+	}
+}
+
+# Now construct the actual graphs
+my %current; # Most recent data for each repo
+for my $ts (@times) {
+	# update %current if necessary
+	for my $repo (@repos) {
+		my @rts = @{$rtimes{$repo}};
+		# see if there's anything waiting
+		my $nt = $rts[0];
+		while ($nt <= $ts) {
+			shift @rts;
+			# and here we update %current
+			$current{$repo} = $data{$repo}{$nt};
+			$nt = $rts[0] || LONG_MAX;
+		}
+		$rtimes{$repo} = \@rts;
+	}
+	
 	print $out "$ts ";
 	if ($opts{bylang}) {
 		my $v = 0;
 		for my $lang (@langs) {
-			my $r = $result->{$lang};
-			$v += $r->{CodeLines} if $r;
-			$v += $r->{CommentLines} if $r and not $opts{nocomments};
+			for my $repo (@repos) {
+				my $r = $current{$repo}{$lang};
+				$v += $r->{CodeLines} if $r;
+				$v += $r->{CommentLines} if $r and not $opts{nocomments};
+			}
 			print $out "$v ";
 		}
 	} else {
 		my ($code, $comment) = (0, 0);
-		for my $lang (keys $result) {
-			$code += $result->{$lang}{CodeLines};
-			$comment += $result->{$lang}{CommentLines};
+		for my $repo (@repos) {
+			my $d = $current{$repo};
+			next unless $d;
+			for my $lang (keys $d) {
+				$code += $d->{$lang}{CodeLines};
+				$comment += $d->{$lang}{CommentLines};
+			}
+			print $out $code;
+			my $total = $code + $comment;
+			print $out " $total" unless $opts{nocomments};
 		}
-		print $out $code;
-		my $total = $code + $comment;
-		print $out " $total" unless $opts{nocomments};
 	}
 	print $out "\n";
 }
+
+#for (@commits) {
+#	my ($ts, $rev) = split / /;
+#	my $result = $data{$ts};
+#	print $out "$ts ";
+#	if ($opts{bylang}) {
+#		my $v = 0;
+#		for my $lang (@langs) {
+#			my $r = $result->{$lang};
+#			$v += $r->{CodeLines} if $r;
+#			$v += $r->{CommentLines} if $r and not $opts{nocomments};
+#			print $out "$v ";
+#		}
+#	} else {
+#		my ($code, $comment) = (0, 0);
+#		for my $lang (keys $result) {
+#			$code += $result->{$lang}{CodeLines};
+#			$comment += $result->{$lang}{CommentLines};
+#		}
+#		print $out $code;
+#		my $total = $code + $comment;
+#		print $out " $total" unless $opts{nocomments};
+#	}
+#	print $out "\n";
+#}
 
 unless ($opts{noplot}) {
 	close $out or die $!;
@@ -197,11 +284,8 @@ END
 	rm $dfilename or die $!;
 }
 
-chdir $calldir;
-rmtree $destrepo;
-
 sub print_help {
-	print<<END;
+	print <<END;
 usage: $0 [OPTIONS] [[VCS::]REPOSITORY] ...
 options:
   -sparse      Iterate on dates rather than commits
@@ -220,14 +304,14 @@ sub vcs_clone {
 			my @cmd = ("git", "clone", "-b", "master");
 			push @cmd, "-q" unless $opts{verbose};
 			push @cmd, $repo, $destrepo;
-			print ("> " . (join ' ', @cmd) . "\n");
+			print ("> " . (join ' ', @cmd) . "\n") if $opts{verbose};
 			die "git clone failed" if system @cmd;
 		}
 		case "hg" {
 			my @cmd = ("hg", "clone", "-b", "default");
 			push @cmd, "-q" unless $opts{verbose};
 			push @cmd, $repo, $destrepo;
-			print ("> " . (join ' ', @cmd) . "\n");
+			print ("> " . (join ' ', @cmd) . "\n") if $opts{verbose};
 			die "mercurial clone failed" if system @cmd;
 		}
 	}
@@ -283,6 +367,7 @@ repository
 =head1 SYNOPSIS
 
 B<reposloc> [I<OPTIONS>] [[I<VCS>::]I<REPOSITORY>] ...
+
 B<reposloc> [I<OPTIONS>] - < repositories.txt
 
 =head1 DESCRIPTION

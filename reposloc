@@ -29,6 +29,7 @@ while ($na =~ /^-./) {
 		case '-bylang' { $opts{bylang} = 1 }
 		case '-nocomments' { $opts{nocomments} = 1 }
 		case '-progress' { $opts{progress} = 1 }
+		case '-warn' { $opts{warn} = 1 }
 		case '-verbose' { $opts{verbose} = 1 }
 		else {
 			print_help;
@@ -75,10 +76,18 @@ for my $r (@repos) {
 print STDERR "Cloning repositories...\n" if $opts{progress};
 my %destrepo;
 my $calldir = getcwd;
+my @nrepos; # repos not ignored
 for my $repo (@repos) {
 	$destrepo{$repo} = tmpnam();
-	vcs_clone $vcs{$repo}, $repo, $destrepo{$repo};
+	if (vcs_clone $vcs{$repo}, $repo, $destrepo{$repo}) {
+		push @nrepos, $repo
+	} else {
+		rmtree $destrepo{$repo};
+		delete $destrepo{$repo};
+	}
 }
+@repos = @nrepos;
+die "No repositories" unless $#repos > -1;
 
 # Read a list of commits for each repository
 my %commits;
@@ -273,8 +282,15 @@ options:
   -bylang      Show statistics for individual languages
   -nocomments  Don't include comment counts
   -progress    Display progress information
+  -warn        Don't abort on VCS call errors
   -verbose     Print extra information
 END
+}
+
+sub vcs_error {
+	my $err = shift;
+	die $err unless $opts{warn};
+	warn $err;
 }
 
 sub vcs_clone {
@@ -285,16 +301,17 @@ sub vcs_clone {
 			push @cmd, "-q" unless $opts{verbose};
 			push @cmd, $repo, $destrepo;
 			print ("> " . (join ' ', @cmd) . "\n") if $opts{verbose};
-			die "git clone failed" if system @cmd;
+			vcs_error "git clone failed" and return 0 if system @cmd;
 		}
 		case "hg" {
 			my @cmd = ("hg", "clone", "-b", "default");
 			push @cmd, "-q" unless $opts{verbose};
 			push @cmd, $repo, $destrepo;
 			print ("> " . (join ' ', @cmd) . "\n") if $opts{verbose};
-			die "mercurial clone failed" if system @cmd;
+			vcs_error "mercurial clone failed" and return 0 if system @cmd;
 		}
 	}
+	1
 }
 
 sub git_revlist {
@@ -400,6 +417,14 @@ include comments in each language's statistic.
 
 Print progress information to standard error.
 
+=item B<-warn>
+
+Warn only - do not abort - when external programs return errors. The entire
+associated repository will be dropped from the resulting data, to avoid errors
+showing up as discontinuities. This is useful for running analysis on large
+sets of repositories, not all of which might be 'clean' (or even exist any
+more).
+
 =item B<-verbose>
 
 Shows what commands are being run, and instructs those commands to print their
@@ -410,6 +435,9 @@ own verbose information. This option may not go well with B<-progress>.
 =head1 BUGS
 
 Analysis of branches other than C<master> is not supported.
+
+The B<-warn> flag only affects behaviour on clone failures - the most common,
+but not by any means the only.
 
 Please report any further bugs found to the author.
 

@@ -72,27 +72,24 @@ for my $r (@repos) {
 	$vcs{$r} = $v;
 }
 
-# Clone all repositories
-print STDERR "Cloning repositories...\n" if $opts{progress};
+# Clone all repositories and get stats
 my %destrepo;
 my $calldir = getcwd;
-my @nrepos; # repos not ignored
+my %commits;
+my ($ri, $rt) = (0, $#repos+1);
+my %langsh; # set of all languages in use
+my %data; # $data{$repo}{$timestamp}
 for my $repo (@repos) {
+	# Clone
 	$destrepo{$repo} = tmpnam();
-	if (vcs_clone $vcs{$repo}, $repo, $destrepo{$repo}) {
-		push @nrepos, $repo
-	} else {
+	unless (vcs_clone $vcs{$repo}, $repo, $destrepo{$repo}) {
 		rmtree $destrepo{$repo};
 		delete $destrepo{$repo};
+		warn "Ignoring repo $repo";
+		next;
 	}
-}
-@repos = @nrepos;
-die "No repositories" unless $#repos > -1;
 
-# Read a list of commits for each repository
-my %commits;
-print STDERR "Reading commits...\n" if $opts{progress};
-for my $repo (@repos) {
+	# Read list of commits
 	chdir $destrepo{$repo};
 	my @ci = vcs_revlist $vcs{$repo};
 	chdir $calldir;
@@ -115,14 +112,10 @@ for my $repo (@repos) {
 		}
 		$commits{$repo} = \@cs;
 	}
-}
 
-# We'll construct an in-memory graph for each repository, and then add them together at the end.
-my ($ri, $rt) = (0, $#repos+1);
-my %langsh; # set of all languages in use
-my %data; # $data{$repo}{$timestamp}
-for my $repo (@repos) {
-	my @ci = @{$commits{$repo}};
+	# We'll construct an in-memory graph for each repository, and then add
+	# them together at the end.
+	
 	$ri++;
 	my ($pci, $pct) = (0, $#ci+1); print STDERR " $ri/$rt\tFetching stats for '$repo' ($pct commits)...\n" if $opts{progress} or $opts{verbose};
 	chdir $destrepo{$repo};
@@ -138,11 +131,10 @@ for my $repo (@repos) {
 	}
 	print "\n";
 	chdir $calldir;
+
+	rmtree $destrepo{$repo};
 }
 my @langs = keys %langsh;
-
-# Clean up temporary clones
-rmtree $destrepo{$_} for @repos;
 
 ## Post-process and graph
 

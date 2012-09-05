@@ -93,9 +93,7 @@ for my $repo (@repos) {
 	chdir $destrepo{$repo};
 	my @ci = vcs_revlist $vcs{$repo};
 	chdir $calldir;
-	unless ($opts{sparse}) {
-		$commits{$repo} = \@ci;
-	} else {
+	if ($opts{sparse}) {
 		my @cs;
 		# Weed out changes that occured on the same day. We have to do
 		# this both here (rather than below) so that we don't waste
@@ -110,7 +108,7 @@ for my $repo (@repos) {
 				push @cs, "$ts $rev";
 			}
 		}
-		$commits{$repo} = \@cs;
+		@ci = @cs;
 	}
 
 	# We'll construct an in-memory graph for each repository, and then add

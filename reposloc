@@ -115,13 +115,13 @@ for my $repo (@repos) {
 
 	# We'll construct an in-memory graph for each repository, and then add
 	# them together at the end.
-	
+
 	$ri++;
 	my ($pci, $pct) = (0, $#ci+1); print STDERR " $ri/$rt\tFetching stats for '$repo' ($pct commits)...\n" if $opts{progress} or $opts{verbose};
 	chdir $destrepo{$repo};
 	for (@ci) {
 		$pci++;
-		print STDERR " $pci";
+		print STDERR " $pci" if $opts{progress} or $opts{verbose};
 		my ($ts, $rev) = split / /;
 		vcs_checkout $vcs{$repo}, $rev;
 		my $json = `sloc -json`;
@@ -225,10 +225,10 @@ for my $ts (@times) {
 				$code += $d->{$lang}{CodeLines};
 				$comment += $d->{$lang}{CommentLines};
 			}
-			print $out " $code";
-			my $total = $code + $comment;
-			print $out " $total" unless $opts{nocomments};
 		}
+		print $out " $code";
+		my $total = $code + $comment;
+		print $out " $total" unless $opts{nocomments};
 	}
 	print $out "\n";
 }

@@ -188,6 +188,7 @@ unless ($opts{sparse}) {
 
 # Now construct the actual graphs
 my %current; # Most recent data for each repo
+my ($startts, $endts) = ($times[0], $times[$#times]);
 for my $ts (@times) {
 	# update %current if necessary
 	for my $repo (@repos) {
@@ -242,7 +243,8 @@ set terminal svg size 800, 580 dynamic enhanced background "#FFFFFF"
 set output '$outfile'
 set xdata time
 set timefmt "%s"
-set key outside
+set xrange ["$startts":"$endts"]
+set key left
 END
 	unless ($opts{bylang}) {
 		if ($opts{nocomments}) {

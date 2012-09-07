@@ -236,9 +236,9 @@ unless ($opts{noplot}) {
 	my $gp;
 	open $gp, "| gnuplot" or die $!;
 	$gp->autoflush(1);
-	my $outfile = catfile($calldir, 'output.png');
+	my $outfile = catfile($calldir, 'output.svg');
 	print $gp <<END;
-set terminal png size 800, 580
+set terminal svg size 800, 580 dynamic enhanced background "#FFFFFF"
 set output '$outfile'
 set xdata time
 set timefmt "%s"

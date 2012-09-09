@@ -1,2 +1,3 @@
 take into account forks
+add -from option (which will also be useful for incremental updates)
 

@@ -127,7 +127,7 @@ for my $repo (@repos) {
 		$data{$repo}{$ts} = $result;
 		$langsh{$_} = 1 for keys $result;
 	}
-	print STDERR "\n";
+	print STDERR "\n" if $opts{progress} or $opts{verbose};
 	chdir $calldir;
 
 	rmtree $destrepo{$repo};

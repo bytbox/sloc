@@ -162,10 +162,10 @@ if ($opts{bylang}) {
 print $out "\n";
 
 # Collect all times in use.
+@repos = keys %destrepo;
 my %timesh;
 my %rtimes;
 for my $repo (@repos) {
-	next unless $data{$repo};
 	my @tss = sort keys $data{$repo};
 	$timesh{$_} = 1 for @tss;
 	$rtimes{$repo} = \@tss;

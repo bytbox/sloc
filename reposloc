@@ -49,6 +49,8 @@ if ($na =~ /^-$/) {
 	push @repos, @ARGV;
 }
 
+@repos = keys { map {$_ => 1} @repos };
+
 # Get type of repositories
 my %vcs;
 for my $r (@repos) {
@@ -163,6 +165,7 @@ print $out "\n";
 my %timesh;
 my %rtimes;
 for my $repo (@repos) {
+	next unless $data{$repo};
 	my @tss = sort keys $data{$repo};
 	$timesh{$_} = 1 for @tss;
 	$rtimes{$repo} = \@tss;

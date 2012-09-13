@@ -73,7 +73,7 @@ var (
 	shComments   = Commenter{`#`, "\000", "\000", false}
 	semiComments = Commenter{`;`, "\000", "\000", false}
 	hsComments   = Commenter{`--`, `{-`, `-}`, true}
-	sqlComments  = Commenter{`--`, "\000", "\000", false}
+	sqlComments  = Commenter{`--`, `/*`, `*/`, false}
 	pyComments   = Commenter{`#`, `"""`, `"""`, false}
 
 	// TODO support POD and __END__

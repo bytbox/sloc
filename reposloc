@@ -128,7 +128,7 @@ for my $repo (@repos) {
 		my $result = from_json $json or die $!;
 		$data{$repo}{$ts} = $result;
 		for my $l (keys $result) {
-			push @langs, $l unless grep {$_ eq $l} @langs;
+			unshift @langs, $l unless grep {$_ eq $l} @langs;
 		}
 	}
 	print STDERR "\n" if $opts{progress} or $opts{verbose};

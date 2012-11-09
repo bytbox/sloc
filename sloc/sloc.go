@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-const VERSION = `0.2.2`
+const VERSION = `0.2.3`
 
 var languages = []Language{
 	Language{"Thrift", mExt(".thrift"), cComments},

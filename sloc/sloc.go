@@ -37,6 +37,9 @@ var languages = []Language{
 
 	Language{"Shell", mExt(".sh"), shComments},
 	Language{"Bash", mExt(".bash"), shComments},
+	Language{"R", mExt(".r"), shComments},
+
+	Language{"MATLAB", mExt(".m"), matlabComments},
 
 	Language{"Ruby", mExt(".rb"), shComments},
 	Language{"Python", mExt(".py"), pyComments},
@@ -68,16 +71,17 @@ type Commenter struct {
 }
 
 var (
-	noComments   = Commenter{"\000", "\000", "\000", false}
-	xmlComments  = Commenter{"\000", `<!--`, `-->`, false}
-	cComments    = Commenter{`//`, `/*`, `*/`, false}
-	cssComments  = Commenter{"\000", `/*`, `*/`, false}
-	shComments   = Commenter{`#`, "\000", "\000", false}
-	semiComments = Commenter{`;`, "\000", "\000", false}
-	hsComments   = Commenter{`--`, `{-`, `-}`, true}
-	mlComments   = Commenter{`\000`, `(*`, `*)`, false}
-	sqlComments  = Commenter{`--`, `/*`, `*/`, false}
-	pyComments   = Commenter{`#`, `"""`, `"""`, false}
+	noComments     = Commenter{"\000", "\000", "\000", false}
+	xmlComments    = Commenter{"\000", `<!--`, `-->`, false}
+	cComments      = Commenter{`//`, `/*`, `*/`, false}
+	cssComments    = Commenter{"\000", `/*`, `*/`, false}
+	shComments     = Commenter{`#`, "\000", "\000", false}
+	semiComments   = Commenter{`;`, "\000", "\000", false}
+	hsComments     = Commenter{`--`, `{-`, `-}`, true}
+	mlComments     = Commenter{`\000`, `(*`, `*)`, false}
+	sqlComments    = Commenter{`--`, `/*`, `*/`, false}
+	pyComments     = Commenter{`#`, `"""`, `"""`, false}
+	matlabComments = Commenter{`%`, `%{`, `%}`, false}
 
 	// TODO support POD and __END__
 	perlComments = Commenter{`#`, "\000", "\000", false}

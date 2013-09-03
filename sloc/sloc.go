@@ -27,6 +27,8 @@ var languages = []Language{
 	Language{"YACC", mExt(".y"), cComments},
 	Language{"Lex", mExt(".l"), cComments},
 
+	Language{"Lua", mExt(".lua"), luaComments},
+
 	Language{"SQL", mExt(".sql"), sqlComments},
 
 	Language{"Haskell", mExt(".hs", ".lhs"), hsComments},
@@ -80,6 +82,7 @@ var (
 	hsComments     = Commenter{`--`, `{-`, `-}`, true}
 	mlComments     = Commenter{`\000`, `(*`, `*)`, false}
 	sqlComments    = Commenter{`--`, `/*`, `*/`, false}
+	luaComments    = Commenter{`--`, `--[[`, `]]`, false}
 	pyComments     = Commenter{`#`, `"""`, `"""`, false}
 	matlabComments = Commenter{`%`, `%{`, `%}`, false}
 

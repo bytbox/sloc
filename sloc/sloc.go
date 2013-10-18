@@ -40,6 +40,7 @@ var languages = []Language{
 	Language{"Shell", mExt(".sh"), shComments},
 	Language{"Bash", mExt(".bash"), shComments},
 	Language{"R", mExt(".r", ".R"), shComments},
+	Language{"Tcl", mExt(".tcl"), shComments},
 
 	Language{"MATLAB", mExt(".m"), matlabComments},
 

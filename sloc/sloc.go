@@ -64,6 +64,8 @@ var languages = []Language{
 	Language{"XML", mExt(".xml"), xmlComments},
 	Language{"CSS", mExt(".css"), cssComments},
 	Language{"JavaScript", mExt(".js"), cComments},
+
+	Language{"Erlang", mExt(".erl"), erlangComments},
 }
 
 type Commenter struct {
@@ -86,6 +88,7 @@ var (
 	luaComments    = Commenter{`--`, `--[[`, `]]`, false}
 	pyComments     = Commenter{`#`, `"""`, `"""`, false}
 	matlabComments = Commenter{`%`, `%{`, `%}`, false}
+	erlangComments = Commenter{`%`, `/*`, `*/`, false}
 
 	// TODO support POD and __END__
 	perlComments = Commenter{`#`, "\000", "\000", false}

@@ -88,7 +88,7 @@ var (
 	luaComments    = Commenter{`--`, `--[[`, `]]`, false}
 	pyComments     = Commenter{`#`, `"""`, `"""`, false}
 	matlabComments = Commenter{`%`, `%{`, `%}`, false}
-	erlangComments = Commenter{`%`, `/*`, `*/`, false}
+	erlangComments = Commenter{`%`, "\000", "\000", false}
 
 	// TODO support POD and __END__
 	perlComments = Commenter{`#`, "\000", "\000", false}

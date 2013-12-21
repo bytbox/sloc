@@ -248,6 +248,7 @@ set output '$outfile'
 set xdata time
 set timefmt "%s"
 set xrange ["$startts":"$endts"]
+set yrange [0:*]
 set key left
 END
 	unless ($opts{bylang}) {

@@ -266,8 +266,7 @@ END
 	}
 	print $gp "exit\n";
 	wait;
-	close $gp or die $!;
-	rm $dfilename or die $!;
+	unlink $dfilename or die $!;
 }
 
 sub print_help {

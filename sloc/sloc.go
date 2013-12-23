@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-const VERSION = `0.2.4`
+const VERSION = `0.3`
 
 var languages = []Language{
 	Language{"Thrift", mExt(".thrift"), cComments},
@@ -244,6 +244,11 @@ func add(n string) {
 		fs, err := ioutil.ReadDir(n)
 		if err != nil {
 			goto invalid
+		}
+		for _, f := range fs {
+			if f.Name() == ".nosloc" {
+				return
+			}
 		}
 		for _, f := range fs {
 			if f.Name()[0] != '.' {

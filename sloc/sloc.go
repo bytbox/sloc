@@ -44,7 +44,7 @@ var languages = []Language{
 
 	Language{"MATLAB", mExt(".m"), matlabComments},
 
-	Language{"Ruby", mExt(".rb"), shComments},
+	Language{"Ruby", mExt(".rb"), rubyComments},
 	Language{"Python", mExt(".py"), pyComments},
 	Language{"Assembly", mExt(".asm", ".s"), semiComments},
 	Language{"Lisp", mExt(".lsp", ".lisp"), semiComments},
@@ -64,6 +64,7 @@ var languages = []Language{
 	Language{"XML", mExt(".xml"), xmlComments},
 	Language{"CSS", mExt(".css"), cssComments},
 	Language{"JavaScript", mExt(".js"), cComments},
+	Language{"CoffeeScript", mExt(".coffee"), coffeeComments},
 
 	Language{"Erlang", mExt(".erl"), erlangComments},
 }
@@ -89,6 +90,8 @@ var (
 	pyComments     = Commenter{`#`, `"""`, `"""`, false}
 	matlabComments = Commenter{`%`, `%{`, `%}`, false}
 	erlangComments = Commenter{`%`, "\000", "\000", false}
+	rubyComments   = Commenter{`#`, "=begin", "=end", false}
+	coffeeComments = Commenter{`#`, "###", "###", false}
 
 	// TODO support POD and __END__
 	perlComments = Commenter{`#`, "\000", "\000", false}

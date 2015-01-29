@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-const VERSION = `0.3`
+const VERSION = `0.3.1`
 
 var languages = []Language{
 	Language{"Thrift", mExt(".thrift"), cComments},
@@ -107,18 +107,29 @@ type Language struct {
 func (l Language) Update(c []byte, s *Stats) {
 	s.FileCount++
 
+	commentLen := 0
+	codeLen := 0
 	inComment := 0 // this is an int for nesting
 	inLComment := false
-	blank := true
 	lc := []byte(l.LineComment)
 	sc := []byte(l.StartComment)
 	ec := []byte(l.EndComment)
 	lp, sp, ep := 0, 0, 0
 
 	for _, b := range c {
+		if b != byte(' ') && b != byte('\t') && b != byte('\n') {
+			if !inLComment && inComment == 0 {
+				codeLen++
+			} else {
+				commentLen++
+			}
+		}
 		if inComment == 0 && b == lc[lp] {
 			lp++
 			if lp == len(lc) {
+				if !inLComment {
+					codeLen -= lp
+				}
 				inLComment = true
 				lp = 0
 			}
@@ -128,6 +139,9 @@ func (l Language) Update(c []byte, s *Stats) {
 		if !inLComment && b == sc[sp] {
 			sp++
 			if sp == len(sc) {
+				if inComment == 0 {
+					codeLen -= sp
+				}
 				inComment++
 				if inComment > 1 && !l.Nesting {
 					inComment = 1
@@ -143,30 +157,29 @@ func (l Language) Update(c []byte, s *Stats) {
 				if inComment > 0 {
 					inComment--
 				}
+				if inComment == 0 {
+					commentLen -= ep
+				}
 				ep = 0
 			}
 		} else {
 			ep = 0
 		}
 
-		if b != byte(' ') && b != byte('\t') && b != byte('\n') {
-			blank = false
-		}
-
-		// BUG(srl): lines with comment don't count towards code
-		// Note that lines with both code and comment count towards
-		// each, but are not counted twice in the total.
 		if b == byte('\n') {
 			s.TotalLines++
-			if inComment > 0 || inLComment {
-				inLComment = false
+			if commentLen > 0 {
 				s.CommentLines++
-			} else if blank {
-				s.BlankLines++
-			} else {
+			}
+			if codeLen > 0 {
 				s.CodeLines++
 			}
-			blank = true
+			if commentLen == 0 && codeLen == 0 {
+				s.BlankLines++
+			}
+			inLComment = false
+			codeLen = 0
+			commentLen = 0
 			continue
 		}
 	}

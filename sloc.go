@@ -121,7 +121,7 @@ func (l Language) Update(c []byte, s *Stats) {
 			}
 		} else { ep = 0 }
 
-		if b != byte(' ') && b != byte('\t') && b != byte('\n') {
+		if b != byte(' ') && b != byte('\t') && b != byte('\n') && b != byte('\r') {
 			blank = false
 		}
 

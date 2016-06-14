@@ -117,7 +117,7 @@ func (l Language) Update(c []byte, s *Stats) {
 	lp, sp, ep := 0, 0, 0
 
 	for _, b := range c {
-		if b != byte(' ') && b != byte('\t') && b != byte('\n') {
+		if b != byte(' ') && b != byte('\t') && b != byte('\n') && b != byte('\r') {
 			if !inLComment && inComment == 0 {
 				codeLen++
 			} else {

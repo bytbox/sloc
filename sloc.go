@@ -56,6 +56,7 @@ var languages = []Language{
 	Language{"XML", mExt(".xml"), xmlComments},
 	Language{"CSS", mExt(".css"), cssComments},
 	Language{"JavaScript", mExt(".js"), cComments},
+	Language{"JSON", mExt(".json"), noComments},
 }
 
 type Commenter struct {

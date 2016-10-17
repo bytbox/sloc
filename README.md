@@ -27,3 +27,8 @@ repository with no compilation done.
 You can generate JSON output with the `-json` flag, if that's easy to parse in
 the programming/scripting language of your choice.
 
+### USAGE
+
+#### 1. First you should install the go compiler you can do it [here](https://golang.org/doc/install) (remember set the environment variables correctly)
+
+#### 2. Run the sloc.go file like (go sloc.go < filename >)

@@ -65,6 +65,7 @@ var languages = []Language{
 	Language{"CSS", mExt(".css"), cssComments},
 	Language{"JavaScript", mExt(".js"), cComments},
 	Language{"CoffeeScript", mExt(".coffee"), coffeeComments},
+	Language{"JSON", mExt(".json"), noComments},
 
 	Language{"Erlang", mExt(".erl"), erlangComments},
 }

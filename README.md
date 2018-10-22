@@ -29,7 +29,7 @@ the programming/scripting language of your choice.
 
 Install `sloc` with:
 
-    $ go get git.bytbox.net/sloc.git/sloc
+    $ go get github.com/bytbox/sloc/sloc
 
 ## `reposloc`
 

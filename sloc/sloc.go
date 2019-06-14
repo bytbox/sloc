@@ -12,17 +12,19 @@ import (
 	"text/tabwriter"
 )
 
-const VERSION = `0.3.1`
+const VERSION = `1.0.0`
 
 var languages = []Language{
 	Language{"Thrift", mExt(".thrift"), cComments},
 
-	Language{"C", mExt(".c", ".h"), cComments},
+	Language{"C", mExt(".c"), cComments},
 	Language{"C++", mExt(".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx"), cComments},
 	Language{"Go", mExt(".go"), cComments},
 	Language{"Rust", mExt(".rs", ".rc"), cComments},
 	Language{"Scala", mExt(".scala"), cComments},
 	Language{"Java", mExt(".java"), cComments},
+	Language{"Objc", mExt(".m, .h"), cComments},
+	Language{"Swift", mExt(".swift"), cComments},
 
 	Language{"YACC", mExt(".y"), cComments},
 	Language{"Lex", mExt(".l"), cComments},

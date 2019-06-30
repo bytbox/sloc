@@ -27,6 +27,8 @@ var languages = []Language{
 	Language{"YACC", mExt(".y"), cComments},
 	Language{"Lex", mExt(".l"), cComments},
 
+	Language{"Fortran", mExt(".f90"), fortranComments},
+
 	Language{"Lua", mExt(".lua"), luaComments},
 
 	Language{"SQL", mExt(".sql"), sqlComments},
@@ -78,21 +80,22 @@ type Commenter struct {
 }
 
 var (
-	noComments     = Commenter{"\000", "\000", "\000", false}
-	xmlComments    = Commenter{"\000", `<!--`, `-->`, false}
-	cComments      = Commenter{`//`, `/*`, `*/`, false}
-	cssComments    = Commenter{"\000", `/*`, `*/`, false}
-	shComments     = Commenter{`#`, "\000", "\000", false}
-	semiComments   = Commenter{`;`, "\000", "\000", false}
-	hsComments     = Commenter{`--`, `{-`, `-}`, true}
-	mlComments     = Commenter{`\000`, `(*`, `*)`, false}
-	sqlComments    = Commenter{`--`, `/*`, `*/`, false}
-	luaComments    = Commenter{`--`, `--[[`, `]]`, false}
-	pyComments     = Commenter{`#`, `"""`, `"""`, false}
-	matlabComments = Commenter{`%`, `%{`, `%}`, false}
-	erlangComments = Commenter{`%`, "\000", "\000", false}
-	rubyComments   = Commenter{`#`, "=begin", "=end", false}
-	coffeeComments = Commenter{`#`, "###", "###", false}
+	noComments      = Commenter{"\000", "\000", "\000", false}
+	xmlComments     = Commenter{"\000", `<!--`, `-->`, false}
+	fortranComments = Commenter{"!", "\000", "\000", false}
+	cComments       = Commenter{`//`, `/*`, `*/`, false}
+	cssComments     = Commenter{"\000", `/*`, `*/`, false}
+	shComments      = Commenter{`#`, "\000", "\000", false}
+	semiComments    = Commenter{`;`, "\000", "\000", false}
+	hsComments      = Commenter{`--`, `{-`, `-}`, true}
+	mlComments      = Commenter{`\000`, `(*`, `*)`, false}
+	sqlComments     = Commenter{`--`, `/*`, `*/`, false}
+	luaComments     = Commenter{`--`, `--[[`, `]]`, false}
+	pyComments      = Commenter{`#`, `"""`, `"""`, false}
+	matlabComments  = Commenter{`%`, `%{`, `%}`, false}
+	erlangComments  = Commenter{`%`, "\000", "\000", false}
+	rubyComments    = Commenter{`#`, "=begin", "=end", false}
+	coffeeComments  = Commenter{`#`, "###", "###", false}
 
 	// TODO support POD and __END__
 	perlComments = Commenter{`#`, "\000", "\000", false}

@@ -23,6 +23,8 @@ var languages = []Language{
 	Language{"Rust", mExt(".rs", ".rc"), cComments},
 	Language{"Scala", mExt(".scala"), cComments},
 	Language{"Java", mExt(".java"), cComments},
+	Language{"Objc", mExt(".m"), cComments},
+	Language{"Swift", mExt(".swift"), cComments},
 
 	Language{"YACC", mExt(".y"), cComments},
 	Language{"Lex", mExt(".l"), cComments},

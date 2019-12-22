@@ -61,7 +61,7 @@ var languages = []Language{
 	Language{"Markdown", mExt(".md"), noComments},
 
 	Language{"HAML", mExt(".haml"), noComments},
-	Language{"SASS", mExt(".sass"), cssComments},
+	Language{"Sass", mExt(".sass"), cssComments},
 	Language{"SCSS", mExt(".scss"), cssComments},
 
 	Language{"HTML", mExt(".htm", ".html", ".xhtml"), xmlComments},

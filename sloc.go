@@ -12,7 +12,7 @@ import (
 	"text/tabwriter"
 )
 
-const VERSION = `1.1.1`
+const VERSION = `1.3`
 
 var languages = []Language{
 	Language{"Thrift", mExt(".thrift"), cComments},
@@ -48,6 +48,7 @@ var languages = []Language{
 
 	Language{"MATLAB", mExt(".m"), matlabComments},
 
+	Language{"Julia", mExt(".jl"), juliaComments},
 	Language{"Ruby", mExt(".rb"), rubyComments},
 	Language{"Python", mExt(".py"), pyComments},
 	Language{"Assembly", mExt(".asm", ".s"), semiComments},
@@ -98,6 +99,7 @@ var (
 	erlangComments  = Commenter{`%`, "\000", "\000", false}
 	rubyComments    = Commenter{`#`, "=begin", "=end", false}
 	coffeeComments  = Commenter{`#`, "###", "###", false}
+	juliaComments   = Commenter{`#`, "#=", "=#", true}
 
 	// TODO support POD and __END__
 	perlComments = Commenter{`#`, "\000", "\000", false}

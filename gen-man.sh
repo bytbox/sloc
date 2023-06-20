@@ -1,2 +1,2 @@
 #!/bin/sh
-pod2man -c "" -r "`git describe`" reposloc > reposloc.1
+pod2man -c "" -r "`git describe --tags`" reposloc > reposloc.1
